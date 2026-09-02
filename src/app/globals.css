@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-arena-bg: #08080a;
+  --color-arena-panel: #101013;
+  --color-arena-panel-2: #16161b;
+  --color-arena-border: #24242c;
+  --color-arena-text: #e8e8ec;
+  --color-arena-dim: #8b8b98;
+  --color-arena-faint: #55555f;
+  --font-mono-arena: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-arena-bg);
+  color: var(--color-arena-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin scrollbars so the streaming panels don't look chunky */
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #2c2c36;
+  border-radius: 3px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+.cursor-blink::after {
+  content: "▍";
+  animation: blink 1s steps(1) infinite;
+  margin-left: 1px;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 currentColor; opacity: 0.5; }
+  70% { box-shadow: 0 0 0 6px transparent; opacity: 0; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 0; }
+}
+.thinking-dot {
+  animation: pulse-ring 1.6s ease-out infinite;
 }

@@ -6,12 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/copy-stockfish.mjs"
   },
   "dependencies": {
+    "ai": "^7.0.88",
+    "chess.js": "^1.4.0",
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-chessboard": "^5.12.1",
+    "react-dom": "19.2.8",
+    "stockfish": "^18.0.8",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

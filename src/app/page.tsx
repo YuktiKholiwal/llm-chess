@@ -1,69 +1,234 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Arrow } from "react-chessboard";
+import { Board } from "@/components/Board";
+import { Controls } from "@/components/Controls";
+import { EvalBar } from "@/components/EvalBar";
+import { MoveList } from "@/components/MoveList";
+import { PlayerPanel } from "@/components/PlayerPanel";
+import { useEngine } from "@/hooks/useEngine";
+import { useMatch } from "@/hooks/useMatch";
+import { sanToSquares, scorecardFor } from "@/lib/chess-utils";
+import { costOf, formatTokens, formatUsd, type Pricing } from "@/lib/cost";
+import { getModel } from "@/lib/models";
+import type { Color } from "@/lib/types";
+
+const BOARD_PX = 480;
+
+export default function Arena() {
+  const match = useMatch();
+  const [engineOn, setEngineOn] = useState(true);
+  const [pricing, setPricing] = useState<Pricing | null>(null);
+
+  // Real per-token rates from the Gateway catalogue, so the cost meter isn't a
+  // guess. Failure is non-fatal: the meter just shows "—".
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/models")
+      .then((r) => r.json())
+      .then((p: Pricing) => alive && setPricing(p))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const engine = useEngine(match.moves, match.patchMove, {
+    enabled: engineOn,
+    depth: 12,
+  });
+
+  // Seed an opening once on mount; without it every match would replay the
+  // same first few moves at low temperature.
+  const seeded = useRef(false);
+  const { reset } = match;
+  useEffect(() => {
+    if (seeded.current) return;
+    seeded.current = true;
+    reset(true);
+  }, [reset]);
+
+  const turn = (match.fen.split(" ")[1] ?? "w") as Color;
+  const white = getModel(match.players.w);
+  const black = getModel(match.players.b);
+  // Lock the pickers only once a MODEL has moved -- seeded book moves must not
+  // count, or the selector is disabled before the match even starts.
+  const locked = match.moves.some((m) => !m.book);
+
+  const lastMove = match.moves.at(-1) ?? null;
+  const lastByColor = (c: Color) =>
+    [...match.moves].reverse().find((m) => m.color === c) ?? null;
+
+  const currentEval = useMemo(() => {
+    const graded = [...match.moves]
+      .reverse()
+      .find((m) => typeof m.evalAfter === "number");
+    return graded?.evalAfter ?? 0;
+  }, [match.moves]);
+
+  /** Solid arrow for the move just played, ghost arrows for live candidates. */
+  const arrows = useMemo<Arrow[]>(() => {
+    const out: Arrow[] = [];
+    if (lastMove) {
+      const sq = sanToSquares(lastMove.fenBefore, lastMove.san);
+      if (sq)
+        out.push({
+          startSquare: sq.from,
+          endSquare: sq.to,
+          color: getModel(lastMove.modelId).accent + "99",
+        });
+    }
+    if (match.live) {
+      const accent = getModel(match.live.modelId).accent;
+      for (const san of match.live.candidates) {
+        const sq = sanToSquares(match.fen, san);
+        if (sq)
+          out.push({
+            startSquare: sq.from,
+            endSquare: sq.to,
+            color: accent + "44",
+          });
+      }
+    }
+    return out;
+  }, [lastMove, match.live, match.fen]);
+
+  const movesW = useMemo(
+    () => match.moves.filter((m) => m.color === "w"),
+    [match.moves],
+  );
+  const movesB = useMemo(
+    () => match.moves.filter((m) => m.color === "b"),
+    [match.moves],
+  );
+  const costW = pricing ? costOf(movesW, pricing) : null;
+  const costB = pricing ? costOf(movesB, pricing) : null;
+  const totalTokens = match.moves.reduce(
+    (a, m) => a + (m.usage.totalTokens ?? 0),
+    0,
+  );
+
+  const scoreW = useMemo(
+    () => scorecardFor(match.moves, "w", match.players.w),
+    [match.moves, match.players.w],
+  );
+  const scoreB = useMemo(
+    () => scorecardFor(match.moves, "b", match.players.b),
+    [match.moves, match.players.b],
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 p-3">
+      {/* Header */}
+      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-arena-border pb-3">
+        <h1 className="text-[15px] font-semibold tracking-tight">
+          LLM Chess Arena
+        </h1>
+        <span className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim">
+          {match.opening}
+        </span>
+        <span className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim">
+          {match.mode}
+        </span>
+        {match.isDemoMatch && (
+          <span
+            className="rounded px-2 py-0.5 text-[11px] font-semibold text-arena-bg"
+            style={{ background: "#C4B5FD" }}
+            title="Scripted replay of a real game — no API calls, no model output"
+          >
+            DEMO · scripted
+          </span>
+        )}
+        {engineOn && (
+          <span className="text-[11px] text-arena-faint">
+            {engine.grading ? "grading…" : engine.ready ? "engine ready" : "engine off"}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-3 text-[11px]">
+          {match.error && (
+            <span className="max-w-[360px] truncate text-amber-400" title={match.error}>
+              {match.error}
+            </span>
+          )}
+          {totalTokens > 0 && (
+            <span
+              className="flex items-center gap-2 rounded-md border border-arena-border px-2 py-1 font-[family-name:var(--font-mono-arena)] tabular-nums text-arena-dim"
+              title="Estimated spend this match, from live AI Gateway rates"
+            >
+              <span>{formatTokens(totalTokens)} tok</span>
+              {costW !== null && costB !== null && (
+                <span className="text-arena-text">
+                  ~{formatUsd(costW + costB)}
+                </span>
+              )}
+            </span>
+          )}
+          {match.outcome && (
+            <span className="rounded-md bg-arena-text px-2.5 py-1 font-[family-name:var(--font-mono-arena)] font-semibold text-arena-bg">
+              {match.outcome.result} · {match.outcome.reason}
+            </span>
+          )}
+        </div>
+      </header>
+
+      {/* Three columns */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(260px,1fr)]">
+        <PlayerPanel
+          color="w"
+          spec={white}
+          locked={locked}
+          onChangeModel={(id) => match.setPlayers((p) => ({ ...p, w: id }))}
+          isActive={turn === "w" && match.status === "thinking"}
+          live={match.live?.color === "w" ? match.live : null}
+          lastMove={lastByColor("w")}
+          score={scoreW}
+          cost={costW}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="flex min-h-0 flex-col items-center gap-3">
+          <div
+            className="flex shrink-0 items-stretch gap-3"
+            style={{ height: BOARD_PX }}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+            <EvalBar cp={currentEval} active={engineOn} />
+            <div style={{ width: BOARD_PX }}>
+              <Board fen={match.fen} arrows={arrows} />
+            </div>
+          </div>
+          <div className="w-full shrink-0" style={{ maxWidth: BOARD_PX + 36 }}>
+            <Controls
+              status={match.status}
+              running={match.status === "thinking" || match.isRunning}
+              mode={match.mode}
+              setMode={match.setMode}
+              delayMs={match.moveDelayMs}
+              setDelayMs={match.setMoveDelayMs}
+              engineOn={engineOn}
+              setEngineOn={setEngineOn}
+              onStart={match.start}
+              onPause={match.pause}
+              onStep={match.step}
+              onReset={() => match.reset(true)}
+              onDemo={match.startDemo}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+          <div className="min-h-0 w-full flex-1" style={{ maxWidth: BOARD_PX + 36 }}>
+            <MoveList moves={match.moves} />
+          </div>
         </div>
-      </main>
-    </div>
+
+        <PlayerPanel
+          color="b"
+          spec={black}
+          locked={locked}
+          onChangeModel={(id) => match.setPlayers((p) => ({ ...p, b: id }))}
+          isActive={turn === "b" && match.status === "thinking"}
+          live={match.live?.color === "b" ? match.live : null}
+          lastMove={lastByColor("b")}
+          score={scoreB}
+          cost={costB}
+        />
+      </div>
+    </main>
   );
 }
