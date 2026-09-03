@@ -1,4 +1,5 @@
 import { Chess } from "chess.js";
+import { hashText } from "./hash";
 import type { Color, Mode } from "./types";
 
 /**
@@ -9,19 +10,13 @@ import type { Color, Mode } from "./types";
  * Changing the text of an existing version invalidates every comparison made
  * against it. Add a new version instead.
  */
+export { hashText };
+
 export type PromptVersion = "v1-neutral" | "v1-coached";
 
 export const DEFAULT_PROMPT_VERSION: PromptVersion = "v1-neutral";
 
-/** FNV-1a. Short, stable, dependency-free -- for identity, not security. */
-export function hashText(text: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    h ^= text.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h.toString(16).padStart(8, "0");
-}
+
 
 const OUTPUT_CONTRACT = `Output format -- exactly these three sections, in this order:
 

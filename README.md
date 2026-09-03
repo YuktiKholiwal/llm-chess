@@ -205,6 +205,55 @@ The browser drives the loop, which makes pause/step/resume trivial — but the m
 
 ---
 
+## The benchmark runner
+
+The arena is the demo; this is the instrument. Every model answers the **same
+positions**, so comparisons are paired — the opponent-confound that makes
+head-to-head ACPL unreliable does not exist when there is no opponent.
+
+```bash
+# Generate a frozen position set from engine self-play (no API cost)
+npm run bench:gen -- --games 30 --per-category 30 --out bench/sets/core-v1.json
+
+# Score models against it
+npm run bench -- --set bench/sets/core-v1.json \
+  --models anthropic/claude-haiku-4.5,google/gemini-3.7-flash \
+  --limit 40 --max-cost 0.50
+```
+
+Sample output:
+
+```
+Gemini 3.7 Flash
+  accuracy    86.3%  [75.2, 95.1]  (95% CI)
+  acpl        54
+  top-1       50%      top-k 78.6%
+  blunders    7.1%
+  eval error  4.24 pawns  (supplied 100%)
+    tactical           n=  5  acc 99.5%  top1 100%
+    positional         n=  9  acc 79.0%  top1 22.2%
+```
+
+### Why positions come from self-play
+
+They are **novel by construction**. No position in a generated set has appeared
+in an opening book, a puzzle database, or anyone's training data — so
+contamination is designed out rather than defended against. It also removes
+curator bias: nobody chose what to test.
+
+Sets are balanced on **category and side to move**, and content-hashed. The
+runner refuses to start if a set's contents no longer match its recorded hash.
+
+### What the runner guarantees
+
+- **Every run emits a manifest** — position-set hash, prompt hash, engine build
+  and depth, models, cost cap. Enough to reproduce or audit any number.
+- **Confidence intervals on every headline figure**, from a seeded bootstrap, so
+  a published interval can be reproduced exactly.
+- **A hard cost cap**, checked before each request.
+- **Infrastructure failures abort the run.** An unreachable API is not a model
+  scoring zero, and reporting it as one would be a lie.
+
 ## Project layout
 
 ```
@@ -224,6 +273,11 @@ src/
 │   ├── cost.ts               token → USD
 │   ├── accuracy.ts           centipawns to accuracy %, plain-language evals
 │   └── *.test.ts             76 tests over parsing, prompts and scoring
+├── bench/
+│   ├── engine-node.ts        headless Stockfish with MultiPV
+│   ├── positions.ts          set format, hashing, classification
+│   ├── grade.ts              pure scoring + bootstrap CIs
+│   └── ask.ts                one headless model call, with retries
 ├── hooks/
 │   ├── useMatch.ts           the match loop — retries, backoff, pause/step
 │   └── useEngine.ts          grades positions, FEN-cached
@@ -240,7 +294,7 @@ src/
 - [x] Live cost meter from real Gateway rates
 - [x] Frozen, versioned, hash-checked prompts
 - [x] Model self-evaluation scored against the engine
-- [ ] Headless position-set runner — identical positions for every model, paired
+- [x] Headless position-set runner — identical positions for every model, paired
 - [ ] Syzygy tablebase positions for provably-correct ground truth
 - [ ] Calibrated Stockfish opponents for an absolute Elo anchor
 - [ ] Contamination probes — mirrored and colour-swapped positions

@@ -43,3 +43,6 @@ public/stockfish/
 
 # ...but the template belongs in the repo
 !.env.example
+
+# Benchmark run outputs (published results live elsewhere)
+runs/
