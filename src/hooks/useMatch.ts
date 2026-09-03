@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import {
   OPENING_BOOK,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/chess-utils";
 import { isDemo, runDemoPly } from "@/lib/demo";
 import { DEFAULT_BLACK, DEFAULT_WHITE, type Players } from "@/lib/models";
+import { DEFAULT_PROMPT_VERSION, type PromptVersion } from "@/lib/prompt";
 import type {
   Color,
   LiveThought,
@@ -35,6 +36,9 @@ type PlyOutcome = {
   analysis: string;
   reasoning: string;
   usage: Usage;
+  evalClaim?: number | null;
+  promptVersion?: string;
+  promptHash?: string;
   fatal?: string;
   /** Retryable (rate limit, provider blip) rather than a dead end. */
   transient?: boolean;
@@ -105,7 +109,7 @@ export function useMatch() {
   const runningRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
 
-  const [fen, setFen] = useState(chessRef.current.fen());
+  const [fen, setFen] = useState(() => new Chess().fen());
   const [moves, setMoves] = useState<MoveRecord[]>([]);
   const [status, setStatus] = useState<MatchStatus>("idle");
   const [live, setLive] = useState<LiveThought | null>(null);
@@ -117,14 +121,29 @@ export function useMatch() {
     b: DEFAULT_BLACK,
   });
   const [mode, setMode] = useState<Mode>("assisted");
+  const [promptVersion, setPromptVersion] =
+    useState<PromptVersion>(DEFAULT_PROMPT_VERSION);
   const [moveDelayMs, setMoveDelayMs] = useState(1200);
+  const [isRunning, setIsRunning] = useState(false);
 
+  /** Single place that flips the loop flag, so the ref and the UI never drift. */
+  const setRunning = useCallback((on: boolean) => {
+    runningRef.current = on;
+    setIsRunning(on);
+  }, []);
+
+  // The async match loop reads settings that may change mid-game, so they are
+  // mirrored into refs. Done in an effect rather than during render.
   const playersRef = useRef(players);
-  playersRef.current = players;
   const modeRef = useRef(mode);
-  modeRef.current = mode;
+  const promptRef = useRef(promptVersion);
   const delayRef = useRef(moveDelayMs);
-  delayRef.current = moveDelayMs;
+  useEffect(() => {
+    playersRef.current = players;
+    modeRef.current = mode;
+    promptRef.current = promptVersion;
+    delayRef.current = moveDelayMs;
+  }, [players, mode, promptVersion, moveDelayMs]);
 
   /** Lets the engine hook backfill eval data onto an already-played move. */
   const patchMove = useCallback((ply: number, patch: Partial<MoveRecord>) => {
@@ -152,6 +171,8 @@ export function useMatch() {
     let analysis = "";
     let reasoning = "";
     let usage: Usage = {};
+    let evalClaim: number | null | undefined;
+    let promptMeta: { version?: string; hash?: string } = {};
     let chosen: string | null = null;
     let forced = false;
 
@@ -221,6 +242,7 @@ export function useMatch() {
             fen: fenBefore,
             mode: modeRef.current,
             history: historyBefore,
+            promptVersion: promptRef.current,
             rejected,
           },
           abortRef.current!.signal,
@@ -245,6 +267,8 @@ export function useMatch() {
       analysis = out.analysis || textAcc;
       reasoning = out.reasoning || reasonAcc;
       usage = out.usage ?? {};
+      evalClaim = out.evalClaim;
+      promptMeta = { version: out.promptVersion, hash: out.promptHash };
 
       if (out.fatal) {
         setError(out.fatal);
@@ -284,6 +308,9 @@ export function useMatch() {
       forced,
       thinkMs: Date.now() - startedAt,
       usage,
+      evalClaim,
+      promptVersion: promptMeta.version,
+      promptHash: promptMeta.hash,
     };
 
     setMoves((prev) => [...prev, record]);
@@ -294,12 +321,12 @@ export function useMatch() {
     if (done) {
       setOutcome(done);
       setStatus("finished");
-      runningRef.current = false;
+      setRunning(false);
       return false;
     }
     setStatus(runningRef.current ? "thinking" : "paused");
     return true;
-  }, []);
+  }, [setRunning]);
 
   const loop = useCallback(async () => {
     while (runningRef.current) {
@@ -309,13 +336,13 @@ export function useMatch() {
         await new Promise((r) => setTimeout(r, delayRef.current));
       }
     }
-    if (runningRef.current) runningRef.current = false;
+    setRunning(false);
     setStatus((s) => (s === "thinking" ? "paused" : s));
-  }, [playOne]);
+  }, [playOne, setRunning]);
 
   /** Replays a real master game with scripted commentary and zero API calls. */
   const startDemo = useCallback(() => {
-    runningRef.current = false;
+    setRunning(false);
     abortRef.current?.abort();
 
     const chess = new Chess();
@@ -331,20 +358,20 @@ export function useMatch() {
     setError(null);
     setStatus("thinking");
 
-    runningRef.current = true;
+    setRunning(true);
     void loop();
-  }, [loop]);
+  }, [loop, setRunning]);
 
   const start = useCallback(() => {
     if (runningRef.current) return;
-    runningRef.current = true;
+    setRunning(true);
     void loop();
-  }, [loop]);
+  }, [loop, setRunning]);
 
   const pause = useCallback(() => {
-    runningRef.current = false;
+    setRunning(false);
     setStatus((s) => (s === "thinking" ? "paused" : s));
-  }, []);
+  }, [setRunning]);
 
   const step = useCallback(() => {
     if (runningRef.current) return;
@@ -352,7 +379,7 @@ export function useMatch() {
   }, [playOne]);
 
   const reset = useCallback((seedOpening = true) => {
-    runningRef.current = false;
+    setRunning(false);
     abortRef.current?.abort();
 
     const chess = new Chess();
@@ -392,7 +419,7 @@ export function useMatch() {
     setLive(null);
     setError(null);
     setStatus("idle");
-  }, []);
+  }, [setRunning]);
 
   return {
     fen,
@@ -404,9 +431,12 @@ export function useMatch() {
     opening,
     players,
     mode,
+    promptVersion,
+    setPromptVersion,
     moveDelayMs,
-    isRunning: runningRef.current,
-    turn: chessRef.current.turn() as Color,
+    isRunning,
+    // Derived from the FEN rather than read off the ref, so it re-renders.
+    turn: (fen.split(" ")[1] ?? "w") as Color,
     setPlayers,
     setMode,
     setMoveDelayMs,

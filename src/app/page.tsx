@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Arrow } from "react-chessboard";
 import { Board } from "@/components/Board";
 import { Controls } from "@/components/Controls";
-import { EvalBar } from "@/components/EvalBar";
-import { MoveList } from "@/components/MoveList";
+import { EvalBar, EvalSummary } from "@/components/EvalBar";
+import { MoveList, MoveLegend } from "@/components/MoveList";
 import { PlayerPanel } from "@/components/PlayerPanel";
 import { useEngine } from "@/hooks/useEngine";
 import { useMatch } from "@/hooks/useMatch";
@@ -121,14 +121,32 @@ export default function Arena() {
     <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 p-3">
       {/* Header */}
       <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-arena-border pb-3">
-        <h1 className="text-[15px] font-semibold tracking-tight">
-          LLM Chess Arena
-        </h1>
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="text-[15px] font-semibold tracking-tight">
+            LLM Chess Arena
+          </h1>
+          <p className="hidden text-[11px] text-arena-dim sm:block">
+            Two AI models play. Stockfish scores every move.
+          </p>
+        </div>
         <span className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim">
           {match.opening}
         </span>
-        <span className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim">
-          {match.mode}
+        <span
+          className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim"
+          title={
+            match.mode === "assisted"
+              ? "Models are given the list of legal moves"
+              : "Models get only the position and must work out legality themselves"
+          }
+        >
+          legal moves {match.mode === "assisted" ? "shown" : "hidden"}
+        </span>
+        <span
+          className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim"
+          title="Which frozen prompt variant produced these numbers"
+        >
+          prompt: {match.promptVersion}
         </span>
         {match.isDemoMatch && (
           <span
@@ -186,6 +204,9 @@ export default function Arena() {
         />
 
         <div className="flex min-h-0 flex-col items-center gap-3">
+          <div className="flex w-full items-center justify-center" style={{ maxWidth: BOARD_PX + 36 }}>
+            <EvalSummary cp={currentEval} active={engineOn} />
+          </div>
           <div
             className="flex shrink-0 items-stretch gap-3"
             style={{ height: BOARD_PX }}
@@ -210,10 +231,16 @@ export default function Arena() {
               onStep={match.step}
               onReset={() => match.reset(true)}
               onDemo={match.startDemo}
+              promptVersion={match.promptVersion}
+              setPromptVersion={match.setPromptVersion}
             />
           </div>
-          <div className="min-h-0 w-full flex-1" style={{ maxWidth: BOARD_PX + 36 }}>
+          <div
+            className="flex min-h-0 w-full flex-1 flex-col gap-1.5"
+            style={{ maxWidth: BOARD_PX + 36 }}
+          >
             <MoveList moves={match.moves} />
+            <MoveLegend />
           </div>
         </div>
 

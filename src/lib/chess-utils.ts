@@ -75,10 +75,31 @@ export function scorecardFor(
   const sum = (f: (m: MoveRecord) => number) =>
     mine.reduce((a, m) => a + f(m), 0);
 
+  const withAccuracy = mine.filter((m) => typeof m.accuracy === "number");
+  const withEvalErr = mine.filter((m) => typeof m.evalErrorPawns === "number");
+  const claimed = mine.filter((m) => m.evalClaim !== undefined);
+
   return {
     modelId,
     color,
     moves: mine.length,
+    // Mean of per-move accuracies. Reported to one decimal because the spread
+    // between strong models is small enough that integers hide it.
+    accuracy: withAccuracy.length
+      ? Math.round(
+          (withAccuracy.reduce((a, m) => a + (m.accuracy ?? 0), 0) /
+            withAccuracy.length) * 10,
+        ) / 10
+      : 0,
+    evalErrorPawns: withEvalErr.length
+      ? Math.round(
+          (withEvalErr.reduce((a, m) => a + (m.evalErrorPawns ?? 0), 0) /
+            withEvalErr.length) * 100,
+        ) / 100
+      : 0,
+    evalCompliance: claimed.length
+      ? claimed.filter((m) => m.evalClaim !== null).length / claimed.length
+      : 0,
     acpl: graded.length
       ? Math.round(
           graded.reduce((a, m) => a + (m.cpLoss ?? 0), 0) / graded.length,

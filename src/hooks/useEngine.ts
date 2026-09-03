@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import { StockfishEngine, type EngineEval } from "@/lib/engine";
 import { classify } from "@/lib/chess-utils";
+import { accuracyForMove, evalError } from "@/lib/accuracy";
 import type { MoveRecord } from "@/lib/types";
 
 /**
@@ -25,9 +26,16 @@ export function useEngine(
 
   useEffect(() => {
     if (!opts.enabled) return;
-    engineRef.current ??= new StockfishEngine();
-    setReady(true);
+    const engine = (engineRef.current ??= new StockfishEngine());
+    let alive = true;
+    // Report readiness once the worker actually answers, not synchronously on
+    // mount -- setState in an effect body causes a cascading render.
+    void engine
+      .analyze(new Chess().fen(), 1)
+      .then(() => alive && setReady(true))
+      .catch(() => {});
     return () => {
+      alive = false;
       engineRef.current?.terminate();
       engineRef.current = null;
       setReady(false);
@@ -52,9 +60,9 @@ export function useEngine(
     if (!pending.length) return;
 
     busyRef.current = true;
-    setGrading(true);
 
     (async () => {
+      setGrading(true);
       for (const m of pending) {
         try {
           const before = await evalFen(m.fenBefore);
@@ -84,6 +92,13 @@ export function useEngine(
             cpLoss: Math.round(cpLoss),
             bestMove: bestSan,
             quality: classify(cpLoss, legalCount === 1),
+            accuracy: accuracyForMove(before.cp, after.cp, m.color),
+            // Calibration: the model assessed the position BEFORE moving, so
+            // its claim is compared against the engine's read of that position.
+            evalErrorPawns:
+              typeof m.evalClaim === "number"
+                ? evalError(m.evalClaim, before.cp)
+                : undefined,
           });
           setLiveEval(after.cp);
         } catch {

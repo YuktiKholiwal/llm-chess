@@ -2,7 +2,9 @@
 
 # ♟️ LLM Chess Arena
 
-### Two AI models play chess. You watch them think. Stockfish grades every move.
+### An eval harness for LLMs, played out over a chessboard.
+
+**Two models play. You watch them think. Stockfish grades every move.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
@@ -10,6 +12,10 @@
 [![Stockfish](https://img.shields.io/badge/Stockfish-18%20WASM-4a5568?style=flat-square)](https://stockfishchess.org)
 
 <img src="docs/arena.jpg" alt="Claude Haiku 4.5 vs Gemini 3.7 Flash, mid-game, with live analysis and Stockfish scorecards" width="100%">
+
+<sub><i>Claude Haiku 4.5 vs Gemini 3.7 Flash. Captured on an earlier build — the
+scorecard now leads with accuracy %, and the controls have since been
+relabelled.</i></sub>
 
 </div>
 
@@ -39,6 +45,8 @@ There's an offline **demo mode** that replays a real master game — Morphy's Op
 ```bash
 npm install && npm run dev
 ```
+
+Run the test suite with `npm test`.
 
 Open [localhost:3000](http://localhost:3000) and hit **◎ Demo**.
 
@@ -97,7 +105,7 @@ Both players go through the same `Player` interface, so a model, a human and Sto
 
 ## The eval layer
 
-Stockfish evaluates the position before and after each move. The difference — measured in **centipawns**, hundredths of a pawn — is what that move cost you versus the best available.
+Stockfish evaluates the position before and after each move. The difference — measured in **centipawns**, hundredths of a pawn — is what that move cost you versus the best available. That loss is mapped to an **accuracy percentage** using Lichess's published formula, so the headline number sits on a scale chess players already recognise instead of one invented here.
 
 | Centipawn loss | Verdict | |
 |---|---|---|
@@ -112,6 +120,17 @@ Moves with only one legal option are tagged `forced` and excluded — you can't 
 Hover any move in the list to see `mistake · −208cp · best: e5`.
 
 For scale: strong club players average 30–50 ACPL, grandmasters under 20.
+
+### Judgment, measured separately from move choice
+
+Models must also state their own read of the position:
+
+```
+## Evaluation
+<eval>+0.6</eval>
+```
+
+That claim is scored against Stockfish as **eval error, in pawns**. A model can pick sound moves while having no idea who is winning — this is the metric that catches it, and it costs nothing extra to collect. `evalCompliance` separately tracks how often a model supplies a parseable tag at all, since format adherence is itself a measured property.
 
 ---
 
@@ -135,6 +154,24 @@ Without this, one player's panel would just be empty.
 Models hallucinate moves — especially past move 25, when board-state tracking degrades. Each illegal move is fed back with the reason (*"Nf3 is illegal — your knight is on g1"*) and retried up to 3 times. Every attempt is recorded and surfaced as `ILLEGAL` on the scorecard.
 
 It's often **more discriminative than win rate.**
+</details>
+
+<details open>
+<summary><b>Prompts are frozen, versioned and hash-checked</b></summary>
+<br>
+
+A score is only meaningful relative to the exact inputs that produced it. Reword one sentence and every previous number silently becomes incomparable — which is how benchmarks quietly rot.
+
+So prompts are immutable and content-hashed, and every move record carries its version and hash:
+
+| Version | Hash | Contents |
+|---|---|---|
+| `v1-neutral` (default) | `12750a8b` | Task and output contract only — **no chess advice** |
+| `v1-coached` | `bf184887` | Adds strategic scaffolding |
+
+The neutral prompt deliberately says nothing about *how* to play. Coaching would measure the prompt author's chess knowledge as much as the model's, and it helps weak models more than strong ones — compressing, and potentially inverting, the scale. `v1-coached` is retained as a named condition so that **prompt sensitivity becomes a measurable result** rather than a hidden confound.
+
+A test asserts both hashes. Changing a single word fails the build, so altering the instrument is always a deliberate act — you add `v2-*` rather than editing `v1-*`.
 </details>
 
 <details>
@@ -184,7 +221,9 @@ src/
 │   ├── chess-utils.ts        candidates, scoring, opening book
 │   ├── engine.ts             Stockfish UCI wrapper
 │   ├── demo.ts               offline scripted player
-│   └── cost.ts               token → USD
+│   ├── cost.ts               token → USD
+│   ├── accuracy.ts           centipawns to accuracy %, plain-language evals
+│   └── *.test.ts             76 tests over parsing, prompts and scoring
 ├── hooks/
 │   ├── useMatch.ts           the match loop — retries, backoff, pause/step
 │   └── useEngine.ts          grades positions, FEN-cached
@@ -199,6 +238,12 @@ src/
 - [x] Stockfish grading, live eval bar, per-model scorecards
 - [x] Offline demo mode — no API key required
 - [x] Live cost meter from real Gateway rates
+- [x] Frozen, versioned, hash-checked prompts
+- [x] Model self-evaluation scored against the engine
+- [ ] Headless position-set runner — identical positions for every model, paired
+- [ ] Syzygy tablebase positions for provably-correct ground truth
+- [ ] Calibrated Stockfish opponents for an absolute Elo anchor
+- [ ] Contamination probes — mirrored and colour-swapped positions
 - [ ] Post-game report — eval graph with blunders pinned, annotated PGN export
 - [ ] Tournament runner — N games, matched pairs with colours swapped, leaderboard
 - [ ] Server-side durable matches so a game outlives the tab

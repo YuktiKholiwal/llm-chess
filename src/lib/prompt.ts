@@ -2,15 +2,77 @@ import { Chess } from "chess.js";
 import type { Color, Mode } from "./types";
 
 /**
- * Byte-identical for both players apart from the side they're told to play and
- * the mode. Any per-model coaxing here would invalidate the comparison.
+ * Prompts are FROZEN and VERSIONED. A benchmark number is meaningless without
+ * knowing which prompt produced it, so every variant carries a content hash
+ * that is stamped onto each move record and into the run manifest.
+ *
+ * Changing the text of an existing version invalidates every comparison made
+ * against it. Add a new version instead.
  */
-export function systemPrompt(color: Color, mode: Mode): string {
-  const side = color === "w" ? "White" : "Black";
-  return `You are playing a serious competitive game of chess as ${side}.
+export type PromptVersion = "v1-neutral" | "v1-coached";
 
-Every move you make is graded against a strong chess engine, so play the
-objectively strongest move you can find -- not the flashiest one.
+export const DEFAULT_PROMPT_VERSION: PromptVersion = "v1-neutral";
+
+/** FNV-1a. Short, stable, dependency-free -- for identity, not security. */
+export function hashText(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+const OUTPUT_CONTRACT = `Output format -- exactly these three sections, in this order:
+
+## Analysis
+Your reasoning.
+
+## Evaluation
+<eval>N.N</eval>
+
+A single number in pawns, from White's point of view: positive means White is
+better, negative means Black is better, 0.0 is level. Use M3 for "mate in 3 for
+White" and -M3 for "mate in 3 for Black".
+
+## Move
+<move>SAN</move>
+
+Exactly one legal move in Standard Algebraic Notation, nothing else.
+Examples: <move>Nf3</move>, <move>exd5</move>, <move>O-O</move>,
+<move>Qxh7#</move>, <move>e8=Q+</move>.`;
+
+function modeLine(mode: Mode): string {
+  return mode === "assisted"
+    ? "You will be given the list of legal moves. Your move must be one of them, copied exactly."
+    : "You will not be given a list of legal moves. Determine legality yourself from the position.";
+}
+
+/**
+ * NEUTRAL: states the task and the output contract, and says nothing whatsoever
+ * about how to play. Chess advice here would measure the prompt author's skill
+ * rather than the model's, and would help weak models more than strong ones --
+ * compressing, and potentially inverting, the scale.
+ */
+function neutral(color: Color, mode: Mode): string {
+  return `You are playing chess as ${color === "w" ? "White" : "Black"}.
+
+Given the position below, choose the move you consider strongest.
+
+${modeLine(mode)}
+
+${OUTPUT_CONTRACT}`;
+}
+
+/**
+ * COACHED: the neutral prompt plus explicit strategic scaffolding. Retained as
+ * a named condition so prompt sensitivity is measurable -- the coached-minus-
+ * neutral delta says how much a model gains from being told how to think.
+ */
+function coached(color: Color, mode: Mode): string {
+  return `You are playing a serious competitive game of chess as ${color === "w" ? "White" : "Black"}.
+
+Choose the objectively strongest move you can find.
 
 HOW TO THINK
 - Look at forcing moves first: checks, captures, and direct threats.
@@ -21,32 +83,58 @@ HOW TO THINK
 - In the opening, develop and castle. In the endgame, push passed pawns and
   activate your king.
 
-${
-  mode === "assisted"
-    ? "You will be given the complete list of legal moves. Your move MUST be one of them, copied exactly."
-    : "You will NOT be given a list of legal moves. Track the position yourself from the FEN and the board diagram, and make sure your move is legal before you commit to it."
+${modeLine(mode)}
+
+${OUTPUT_CONTRACT}`;
 }
 
-OUTPUT FORMAT -- follow this exactly, both sections, in this order:
-
-## Analysis
-Two to six sentences. Name your top candidate moves in SAN, state the main
-tactical or positional point, and say briefly why you rejected the runners-up.
-
-## Move
-<move>SAN</move>
-
-The <move> tag must contain exactly one legal move in Standard Algebraic
-Notation and nothing else. Examples: <move>Nf3</move>, <move>exd5</move>,
-<move>O-O</move>, <move>Qxh7#</move>, <move>e8=Q+</move>.`;
+export function systemPrompt(
+  color: Color,
+  mode: Mode,
+  version: PromptVersion = DEFAULT_PROMPT_VERSION,
+): string {
+  return version === "v1-coached" ? coached(color, mode) : neutral(color, mode);
 }
+
+/**
+ * Identity of a prompt variant, independent of which side is to move -- both
+ * colours and both modes are hashed together so the hash covers the whole
+ * variant rather than a single rendering of it.
+ */
+export function promptHash(version: PromptVersion): string {
+  const all = (["w", "b"] as Color[])
+    .flatMap((c) =>
+      (["assisted", "blind"] as Mode[]).map((m) => systemPrompt(c, m, version)),
+    )
+    .join(" ");
+  return hashText(all);
+}
+
+export const PROMPT_VERSIONS: {
+  version: PromptVersion;
+  label: string;
+  description: string;
+}[] = [
+  {
+    version: "v1-neutral",
+    label: "Neutral",
+    description: "Task and output format only, no strategic guidance.",
+  },
+  {
+    version: "v1-coached",
+    label: "Coached",
+    description: "Adds strategic scaffolding, for measuring prompt sensitivity.",
+  },
+];
 
 export function positionPrompt(
   fen: string,
   mode: Mode,
-  /** SAN moves played so far. A Chess rebuilt from a FEN has no history of its
+  /**
+   * SAN moves played so far. A Chess rebuilt from a FEN has no history of its
    * own, so the caller must supply it or the model plays each move blind to
-   * how the game got here. */
+   * how the game got here.
+   */
   history: string[] = [],
 ): string {
   const chess = new Chess(fen);
@@ -67,18 +155,13 @@ export function positionPrompt(
   }
 
   if (chess.inCheck()) {
-    parts.push("", "You are IN CHECK. You must address the check this move.");
+    parts.push("", "You are in check.");
   }
 
   if (mode === "assisted") {
-    parts.push(
-      "",
-      `Legal moves (${legal.length}) -- your answer must be one of these, copied exactly:`,
-      legal.join(" "),
-    );
+    parts.push("", `Legal moves (${legal.length}):`, legal.join(" "));
   }
 
-  parts.push("", "Give your ## Analysis, then your ## Move.");
   return parts.join("\n");
 }
 
@@ -101,25 +184,25 @@ export function retryPrompt(
 ): string {
   const chess = new Chess(fen);
   const legal = chess.moves();
-  const lines = [
-    `"${bad}" is not a legal move in this position. ${reason}`,
-    "",
-    "Look at the board again carefully.",
-  ];
+  const noMove = bad === "(no move)" || !bad;
+
+  // The caller's reason usually restates "not legal"; only append it when it
+  // actually adds information, so the retry doesn't read as duplicated noise.
+  const adds = reason && !/not (a )?legal|is not legal/i.test(reason);
+
+  const lines = noMove
+    ? ["Your last reply did not contain a <move> tag, so no move was recorded."]
+    : [`"${bad}" is not a legal move in this position.`];
+  if (adds) lines.push(reason);
+
   if (mode === "assisted") {
     lines.push("", `Legal moves (${legal.length}):`, legal.join(" "));
   } else {
-    lines.push(
-      "",
-      `Board:`,
-      chess.ascii(),
-      "",
-      "Re-derive which of your pieces can actually reach the square you want.",
-    );
+    lines.push("", "Board:", chess.ascii());
   }
   lines.push(
     "",
-    "Reply again in the same format (## Analysis, then ## Move) with a legal move.",
+    "Reply again in the same format (## Analysis, ## Evaluation, ## Move).",
   );
   return lines.join("\n");
 }

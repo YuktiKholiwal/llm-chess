@@ -64,6 +64,19 @@ export function plausibleIllegal(fen: string): string {
   return "Qz9";
 }
 
+/** Rough material balance in centipawns, from White's perspective. */
+export function materialEval(fen: string): number {
+  const values: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
+  let cp = 0;
+  for (const row of new Chess(fen).board()) {
+    for (const sq of row) {
+      if (!sq) continue;
+      cp += (sq.color === "w" ? 1 : -1) * (values[sq.type] ?? 0);
+    }
+  }
+  return cp;
+}
+
 function facts(fen: string, san: string) {
   const chess = new Chess(fen);
   const move = chess.moves({ verbose: true }).find((m) => m.san === san);
@@ -157,6 +170,9 @@ export async function runDemoPly(
   reasoning: string;
   usage: Usage;
   // Present so the demo shares the exact shape of a real ply result.
+  evalClaim?: number | null;
+  promptVersion?: string;
+  promptHash?: string;
   transient?: boolean;
   fatal?: string;
 }> {
@@ -173,13 +189,20 @@ export async function runDemoPly(
   await sleep(300 + Math.random() * 400);
   await emit(reasoning, "reasoning", CHARS_PER_SEC, onDelta, signal);
   await sleep(120);
-  const full = `## Analysis\n${analysis}\n\n## Move\n<move>${san}</move>`;
+  const claimCp = materialEval(fen);
+  const full =
+    `## Analysis\n${analysis}\n\n` +
+    `## Evaluation\n<eval>${(claimCp / 100).toFixed(1)}</eval>\n\n` +
+    `## Move\n<move>${san}</move>`;
   await emit(full, "text", CHARS_PER_SEC, onDelta, signal);
 
   const legal = !shouldFail;
   return {
     legal,
     san,
+    evalClaim: claimCp,
+    promptVersion: "demo",
+    promptHash: "demo",
     error: legal ? null : `${san} is not legal from this position.`,
     analysis,
     reasoning,

@@ -1,5 +1,6 @@
 "use client";
 
+import { PROMPT_VERSIONS, type PromptVersion } from "@/lib/prompt";
 import type { MatchStatus, Mode } from "@/lib/types";
 
 function Btn({
@@ -49,6 +50,8 @@ export function Controls({
   onStep,
   onReset,
   onDemo,
+  promptVersion,
+  setPromptVersion,
 }: {
   status: MatchStatus;
   running: boolean;
@@ -63,6 +66,8 @@ export function Controls({
   onStep: () => void;
   onReset: () => void;
   onDemo: () => void;
+  promptVersion: PromptVersion;
+  setPromptVersion: (v: PromptVersion) => void;
 }) {
   const finished = status === "finished";
   const busy = status === "thinking";
@@ -116,25 +121,48 @@ export function Controls({
       {/* Match settings */}
       <div className="flex flex-wrap items-center gap-2 border-t border-arena-border/60 pt-2">
         <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
-          Difficulty
+          Legal moves
         </span>
         <div className="flex items-center gap-0.5 rounded-md border border-arena-border p-0.5">
-          {(["assisted", "blind"] as Mode[]).map((m) => (
+          {(
+            [
+              ["assisted", "Shown", "The model is given the list of legal moves. Tests chess judgment only."],
+              ["blind", "Hidden", "The model gets only the position and must work out legality itself. Much harder."],
+            ] as [Mode, string, string][]
+          ).map(([m, label, tip]) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              title={
-                m === "assisted"
-                  ? "Legal moves are listed in the prompt — tests chess judgment"
-                  : "FEN and board only — the model must track legality itself"
-              }
-              className={`rounded px-2 py-0.5 text-[11px] capitalize transition-colors ${
+              title={tip}
+              className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
                 mode === m
                   ? "bg-arena-text text-arena-bg"
                   : "text-arena-dim hover:text-arena-text"
               }`}
             >
-              {m}
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <Divider />
+
+        <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
+          Prompt
+        </span>
+        <div className="flex items-center gap-0.5 rounded-md border border-arena-border p-0.5">
+          {PROMPT_VERSIONS.map((pv) => (
+            <button
+              key={pv.version}
+              onClick={() => setPromptVersion(pv.version)}
+              title={pv.description}
+              className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
+                promptVersion === pv.version
+                  ? "bg-arena-text text-arena-bg"
+                  : "text-arena-dim hover:text-arena-text"
+              }`}
+            >
+              {pv.label}
             </button>
           ))}
         </div>

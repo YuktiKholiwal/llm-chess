@@ -2,9 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RichText } from "@/components/RichText";
-import { formatTokens, formatUsd } from "@/lib/cost";
+import { formatUsd } from "@/lib/cost";
 import { MODEL_GROUPS, type ModelSpec } from "@/lib/models";
 import type { Color, LiveThought, MoveRecord, Scorecard } from "@/lib/types";
+
+const STAT_HELP: Record<string, string> = {
+  Blunders: "Moves that threw away a winning or level position.",
+  Illegal: "Times this model proposed a move that isn't legal and had to retry.",
+  "Eval err": "How far the model's own read of the position was from Stockfish's, in pawns. Lower means it understands who is winning.",
+  Cost: "Estimated spend for this side, at live AI Gateway rates.",
+};
 
 function Stat({
   label,
@@ -16,7 +23,7 @@ function Stat({
   tone?: "bad" | "warn";
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-0.5" title={STAT_HELP[label]}>
       <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-arena-faint">
         {label}
       </span>
@@ -193,13 +200,35 @@ export function PlayerPanel({
         )}
       </div>
 
-      {/* Scorecard */}
-      <div className="grid grid-cols-5 gap-1.5 border-t border-arena-border bg-arena-bg/40 px-3 py-2.5">
-        <Stat label="ACPL" value={score.moves ? score.acpl : "—"} />
-        <Stat label="Blund" value={score.blunders} tone="bad" />
-        <Stat label="Illegal" value={score.illegalAttempts} tone="warn" />
-        <Stat label="Tokens" value={formatTokens(score.totalTokens)} />
-        <Stat label="Cost" value={cost === null ? "—" : formatUsd(cost)} />
+      {/* Scorecard. Accuracy leads because it is the one number a non-player
+          can read; ACPL lives in its tooltip for people who want it. */}
+      <div className="border-t border-arena-border bg-arena-bg/40 px-3 py-2.5">
+        <div
+          className="mb-2 flex items-baseline gap-2"
+          title={
+            score.moves
+              ? `Average centipawn loss: ${score.acpl}. How close this model's moves were to Stockfish's best.`
+              : "No moves scored yet"
+          }
+        >
+          <span className="font-[family-name:var(--font-mono-arena)] text-[22px] font-semibold leading-none tabular-nums text-arena-text">
+            {score.moves && score.accuracy ? `${score.accuracy.toFixed(1)}%` : "—"}
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
+            accuracy
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5">
+          <Stat label="Blunders" value={score.blunders} tone="bad" />
+          <Stat label="Illegal" value={score.illegalAttempts} tone="warn" />
+          <Stat
+            label="Eval err"
+            value={
+              score.evalCompliance > 0 ? `${score.evalErrorPawns.toFixed(1)}p` : "—"
+            }
+          />
+          <Stat label="Cost" value={cost === null ? "—" : formatUsd(cost)} />
+        </div>
       </div>
     </div>
   );

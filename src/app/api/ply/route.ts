@@ -2,8 +2,15 @@ import { streamText } from "ai";
 import { Chess } from "chess.js";
 import { getModel } from "@/lib/models";
 import { classifyError } from "@/lib/errors";
-import { extractAnalysis, parseMove } from "@/lib/parse-move";
-import { positionPrompt, retryPrompt, systemPrompt } from "@/lib/prompt";
+import { extractAnalysis, parseEval, parseMove } from "@/lib/parse-move";
+import {
+  DEFAULT_PROMPT_VERSION,
+  positionPrompt,
+  promptHash,
+  retryPrompt,
+  systemPrompt,
+  type PromptVersion,
+} from "@/lib/prompt";
 import type { Mode, Usage } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -14,6 +21,8 @@ type Body = {
   mode: Mode;
   /** SAN moves played so far; not recoverable from the FEN alone. */
   history?: string[];
+  /** Which frozen prompt variant to use. Stamped onto the result. */
+  promptVersion?: PromptVersion;
   /** Prior rejected attempts in this same ply, oldest first. */
   rejected?: { san: string; reason: string }[];
 };
@@ -23,6 +32,7 @@ export async function POST(req: Request) {
   const spec = getModel(body.modelId);
   const chess = new Chess(body.fen);
   const color = chess.turn();
+  const promptVersion = body.promptVersion ?? DEFAULT_PROMPT_VERSION;
 
   const messages: { role: "user" | "assistant"; content: string }[] = [
     {
@@ -51,7 +61,7 @@ export async function POST(req: Request) {
       try {
         const result = streamText({
           model: spec.id,
-          system: systemPrompt(color, body.mode),
+          system: systemPrompt(color, body.mode, promptVersion),
           messages,
           providerOptions: spec.providerOptions,
           maxOutputTokens: spec.maxOutputTokens,
@@ -90,6 +100,9 @@ export async function POST(req: Request) {
             analysis: extractAnalysis(text),
             reasoning,
             usage,
+            evalClaim: parseEval(text),
+            promptVersion,
+            promptHash: promptHash(promptVersion),
           });
         } else {
           // chess.js throws on an illegal move; that throw IS the validation.
@@ -109,6 +122,9 @@ export async function POST(req: Request) {
             analysis: extractAnalysis(text),
             reasoning,
             usage,
+            evalClaim: parseEval(text),
+            promptVersion,
+            promptHash: promptHash(promptVersion),
           });
         }
       } catch (err) {

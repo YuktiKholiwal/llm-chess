@@ -58,6 +58,36 @@ function Cell({ move }: { move: MoveRecord | undefined }) {
   );
 }
 
+const LEGEND: { q: MoveQuality; label: string }[] = [
+  { q: "best", label: "best" },
+  { q: "good", label: "good" },
+  { q: "inaccuracy", label: "inaccuracy" },
+  { q: "mistake", label: "mistake" },
+  { q: "blunder", label: "blunder" },
+];
+
+/** The coloured dots mean nothing without this. */
+export function MoveLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[10px] text-arena-faint">
+      <span className="uppercase tracking-[0.08em]">Move quality</span>
+      {LEGEND.map(({ q, label }) => (
+        <span key={q} className="flex items-center gap-1">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: QUALITY_COLOR[q] }}
+          />
+          {label}
+        </span>
+      ))}
+      <span className="flex items-center gap-1">
+        <span className="h-1.5 w-1.5 rounded-full border border-arena-faint" />
+        opening book
+      </span>
+    </div>
+  );
+}
+
 export function MoveList({ moves }: { moves: MoveRecord[] }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -73,8 +103,9 @@ export function MoveList({ moves }: { moves: MoveRecord[] }) {
       className="scroll-thin h-full min-h-0 overflow-y-auto rounded-lg border border-arena-border bg-arena-panel p-2"
     >
       {rows.length === 0 && (
-        <p className="p-2 text-[12px] text-arena-faint italic">
-          No moves yet.
+        <p className="p-2 text-[12px] italic text-arena-faint">
+          Moves will appear here, colour-coded by how good Stockfish thinks they
+          are.
         </p>
       )}
       {rows.map((row, i) => (
