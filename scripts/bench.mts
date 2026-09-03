@@ -16,6 +16,7 @@ import { NodeEngine } from "../src/bench/engine-node";
 import { askModel } from "../src/bench/ask";
 import { bootstrapCI, grade, summarise, type Grade } from "../src/bench/grade";
 import { verifySet, type BenchPosition, type PositionSet } from "../src/bench/positions";
+import { makeEntry, type PublishedRun } from "../src/bench/leaderboard";
 import { costOf, formatUsd, type Pricing } from "../src/lib/cost";
 import { getModel } from "../src/lib/models";
 import { promptHash, type PromptVersion } from "../src/lib/prompt";
@@ -31,6 +32,7 @@ type Args = {
   maxCost: number;
   outDir: string;
   dryRun: boolean;
+  publish: boolean;
 };
 
 function parseArgs(argv: string[]): Args {
@@ -48,7 +50,31 @@ function parseArgs(argv: string[]): Args {
     maxCost: Number(get("max-cost", "1.00")),
     outDir: get("out-dir", "runs"),
     dryRun: argv.includes("--dry-run"),
+    publish: argv.includes("--publish"),
   };
+}
+
+/** Round-robins across categories so a truncated run stays balanced. */
+function stratifiedSample(set: PositionSet, limit: number): BenchPosition[] {
+  const buckets = new Map<string, BenchPosition[]>();
+  for (const p of set.positions) {
+    const list = buckets.get(p.category) ?? [];
+    list.push(p);
+    buckets.set(p.category, list);
+  }
+  const lists = [...buckets.values()];
+  const out: BenchPosition[] = [];
+  for (let i = 0; out.length < limit; i++) {
+    let added = false;
+    for (const list of lists) {
+      if (i < list.length && out.length < limit) {
+        out.push(list[i]);
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return out;
 }
 
 async function fetchPricing(): Promise<Pricing> {
@@ -83,7 +109,10 @@ async function main() {
     process.exit(1);
   }
 
-  const positions = args.limit > 0 ? set.positions.slice(0, args.limit) : set.positions;
+  // A prefix slice would follow the set's category ordering and silently test
+  // only the first one or two categories. Take a stratified sample instead so a
+  // limited run is still representative of the whole set.
+  const positions = args.limit > 0 ? stratifiedSample(set, args.limit) : set.positions;
   const pricing = await fetchPricing();
 
   const engine = new NodeEngine();
@@ -134,7 +163,10 @@ async function main() {
     return cp;
   };
 
-  const perModel = new Map<string, { grades: Grade[]; records: MoveRecord[] }>();
+  const perModel = new Map<
+    string,
+    { grades: Grade[]; records: MoveRecord[]; categories: string[]; latenciesMs: number[] }
+  >();
   let spend = 0;
   let stoppedEarly = false;
   let consecutiveErrors = 0;
@@ -142,7 +174,7 @@ async function main() {
 
   outer: for (const modelId of args.models) {
     const spec = getModel(modelId);
-    perModel.set(modelId, { grades: [], records: [] });
+    perModel.set(modelId, { grades: [], records: [], categories: [], latenciesMs: [] });
     console.log(`\n${spec.label}`);
 
     for (let i = 0; i < positions.length; i++) {
@@ -185,6 +217,8 @@ async function main() {
       const g = grade(p, res, cpAfter);
       const bucket = perModel.get(modelId)!;
       bucket.grades.push(g);
+      bucket.categories.push(p.category);
+      bucket.latenciesMs.push(res.elapsedMs);
 
       // Reuse the arena's record shape so cost accounting is shared.
       const record = {
@@ -286,6 +320,42 @@ async function main() {
       2,
     ) + "\n",
   );
+
+  if (args.publish) {
+    const CATS = ["tactical", "positional", "blunder-avoidance", "endgame"];
+    const published: PublishedRun = {
+      runId,
+      publishedAt: new Date().toISOString(),
+      set: { id: set.id, hash: set.hash, positions: positions.length },
+      prompt: { version: args.promptVersion, hash: promptHash(args.promptVersion) },
+      mode: args.mode,
+      gradingEngine: engine.version,
+      gradingDepth: args.depth,
+      entries: [...perModel]
+        .filter(([, b]) => b.grades.length > 0)
+        .map(([modelId, b]) => {
+          const spec = getModel(modelId);
+          return makeEntry(
+            modelId,
+            { label: spec.label, vendor: spec.vendor },
+            b.grades,
+            CATS.map((category) => ({
+              category,
+              grades: b.grades.filter((_, i) => b.categories[i] === category),
+            })),
+            {
+              totalTokens: b.records.reduce((a, r) => a + (r.usage.totalTokens ?? 0), 0),
+              totalCost: costOf(b.records, pricing),
+              latenciesMs: b.latenciesMs,
+            },
+          );
+        }),
+    };
+    mkdirSync("bench/results", { recursive: true });
+    const path = `bench/results/${runId}.json`;
+    writeFileSync(path, JSON.stringify(published, null, 2) + "\n");
+    console.log(`published → ${path}`);
+  }
 
   console.log(`total ${formatUsd(spend)}   results → ${dir}/`);
 }

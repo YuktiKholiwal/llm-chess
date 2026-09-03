@@ -41,6 +41,11 @@ export type AskOptions = {
   maxRetries?: number;
   /** Extra attempts for rate limits and provider blips. */
   maxTransient?: number;
+  /**
+   * Hard ceiling per request. Without one a hung connection stalls the whole
+   * run -- an observed gpt-5-nano position took 820 seconds.
+   */
+  timeoutMs?: number;
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -55,6 +60,7 @@ export async function askModel(
   const color = chess.turn();
   const maxRetries = opts.maxRetries ?? 3;
   const maxTransient = opts.maxTransient ?? 5;
+  const timeoutMs = opts.timeoutMs ?? 120_000;
   const started = Date.now();
 
   const messages: { role: "user" | "assistant"; content: string }[] = [
@@ -99,6 +105,7 @@ export async function askModel(
           providerOptions: spec.providerOptions,
           maxOutputTokens: spec.maxOutputTokens,
           maxRetries: 2,
+          abortSignal: AbortSignal.timeout(timeoutMs),
         });
         text = res.text;
         addUsage(res.totalUsage);

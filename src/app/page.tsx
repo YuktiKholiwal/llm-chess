@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import type { Arrow } from "react-chessboard";
 import { Board } from "@/components/Board";
 import { Controls } from "@/components/Controls";
@@ -186,6 +187,12 @@ export default function Arena() {
               {match.outcome.result} · {match.outcome.reason}
             </span>
           )}
+          <Link
+            href="/leaderboard"
+            className="rounded-md border border-arena-border px-2.5 py-1 text-arena-dim transition-colors hover:border-arena-dim hover:text-arena-text"
+          >
+            Leaderboard →
+          </Link>
         </div>
       </header>
 
