@@ -47,6 +47,7 @@ class Limits:
     request_timeout_s: float
     max_transient_retries: int
     abort_after_consecutive_errors: int
+    concurrency: int
 
 
 @dataclass(frozen=True)
