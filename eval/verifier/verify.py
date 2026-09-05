@@ -73,7 +73,7 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
     engine = Engine(
         cfg.engine.path, cfg.engine.depth, cfg.engine.threads, cfg.engine.hash_mb
     )
-    client = make_client(api_key())
+    client = make_client(cfg.provider.base_url, api_key(cfg.provider))
     lock = threading.Lock()
     state = {"done": 0, "true": 0, "false": 0, "unverifiable": 0, "cost": 0.0}
 

@@ -212,7 +212,7 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
         return
 
     budget = Budget(cfg.limits.max_cost_usd, cfg.limits.abort_after_consecutive_errors)
-    client = make_client(api_key())
+    client = make_client(cfg.provider.base_url, api_key(cfg.provider))
     write_lock = threading.Lock()
     counter = {"done": 0, "solved": 0, "illegal": 0, "failed": 0}
 

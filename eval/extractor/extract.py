@@ -141,7 +141,7 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
     if not work:
         return
 
-    client = make_client(api_key())
+    client = make_client(cfg.provider.base_url, api_key(cfg.provider))
     lock = threading.Lock()
     state = {"done": 0, "claims": 0, "cost": 0.0, "failures": 0, "stop": None}
 

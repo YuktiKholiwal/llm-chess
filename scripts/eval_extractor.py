@@ -126,7 +126,7 @@ def measure(config_path: str) -> None:
             "Run with --seed N to add traces, then label them."
         )
 
-    client = make_client(api_key())
+    client = make_client(cfg.provider.base_url, api_key(cfg.provider))
     total_matched = total_predicted = total_labelled = 0
     type_right = type_total = 0
 

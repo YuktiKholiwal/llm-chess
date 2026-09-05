@@ -34,6 +34,12 @@ class ModelSpec:
 
 
 @dataclass(frozen=True)
+class ProviderConfig:
+    base_url: str
+    api_key_env: str
+
+
+@dataclass(frozen=True)
 class EngineConfig:
     path: str
     depth: int
@@ -64,6 +70,7 @@ class TaskConfig:
 @dataclass(frozen=True)
 class Config:
     path: Path
+    provider: ProviderConfig
     models: tuple[ModelSpec, ...]
     extractor: ModelSpec
     engine: EngineConfig
@@ -93,6 +100,7 @@ def load(path: str | Path) -> Config:
 
     return Config(
         path=path,
+        provider=ProviderConfig(**raw["provider"]),
         models=tuple(_model(m) for m in raw["models"]),
         extractor=_model(raw["extractor"]),
         engine=EngineConfig(**raw["engine"]),
@@ -103,19 +111,18 @@ def load(path: str | Path) -> Config:
     )
 
 
-def api_key() -> str:
-    """The OpenRouter key, from the environment or a .env file.
+def api_key(provider: ProviderConfig) -> str:
+    """The provider key, from the environment or a .env file.
 
     Read lazily rather than at import so the stages that touch no model at all
     -- tasks, score -- run without a key present.
     """
     load_dotenv(ROOT / ".env")
     load_dotenv(ROOT / ".env.local")
-    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    key = os.environ.get(provider.api_key_env, "").strip()
     if not key:
         raise SystemExit(
-            "OPENROUTER_API_KEY is not set.\n"
-            "Copy .env.example to .env and paste a key from "
-            "https://openrouter.ai/keys"
+            f"{provider.api_key_env} is not set.\n"
+            f"Add it to .env for {provider.base_url}"
         )
     return key

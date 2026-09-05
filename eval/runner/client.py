@@ -1,4 +1,4 @@
-"""One model call through OpenRouter.
+"""One model call through an OpenAI-compatible chat completions API.
 
 Two rules shape this file.
 
@@ -7,9 +7,11 @@ recorded against a model: they are retried with backoff. Auth, billing and
 access failures will never resolve on their own, so those fail immediately
 rather than burning five retries first.
 
-And cost comes from the provider, not from a rate table kept here. OpenRouter
-reports the charge for each response, so there is no local price list to drift
-out of date and silently misreport what a run cost.
+And cost comes from the provider, not from a rate table kept here. Both the
+Vercel AI Gateway and OpenRouter report the charge for each response, so there
+is no local price list to drift out of date and silently misreport what a run
+cost. The endpoint is configurable because the two take an identical request
+body; only the base URL and the key differ.
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ import httpx
 
 from ..config import Limits, ModelSpec
 
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+COMPLETIONS_PATH = "/chat/completions"
 
 TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
 TRANSIENT_TEXT = re.compile(
@@ -35,7 +37,8 @@ TRANSIENT_TEXT = re.compile(
 # Checked first: "free tier is rate-limited, upgrade" reads as both, but no
 # amount of retrying fixes a plan that does not include the model.
 FATAL_TEXT = re.compile(
-    r"no endpoints found|not a valid model|authentication|unauthorized|"
+    r"no endpoints found|model not found|not a valid model|do not have access|"
+    r"authentication|unauthorized|"
     r"invalid api key|insufficient|billing|payment|requires more credits",
     re.IGNORECASE,
 )
@@ -102,7 +105,9 @@ def chat(
     for attempt in range(limits.max_transient_retries + 1):
         status: int | None = None
         try:
-            response = client.post(ENDPOINT, json=body, timeout=limits.request_timeout_s)
+            response = client.post(
+                COMPLETIONS_PATH, json=body, timeout=limits.request_timeout_s
+            )
             status = response.status_code
             response.raise_for_status()
             payload = response.json()
@@ -143,8 +148,9 @@ def chat(
     )
 
 
-def make_client(api_key: str) -> httpx.Client:
+def make_client(base_url: str, api_key: str) -> httpx.Client:
     return httpx.Client(
+        base_url=base_url,
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",

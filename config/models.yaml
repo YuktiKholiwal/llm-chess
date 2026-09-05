@@ -2,6 +2,18 @@
 # difference in scores is a difference in the model rather than in how it was
 # asked. Adding a model here is all that is needed to include it in a run.
 
+provider:
+  # Any OpenAI-compatible endpoint. The Vercel AI Gateway and OpenRouter both
+  # accept the identical request body -- including `usage.include`, which is
+  # what lets cost come from the provider rather than a local rate table, and
+  # the unified `reasoning.effort` knob.
+  #
+  # For OpenRouter instead:
+  #   base_url: https://openrouter.ai/api/v1
+  #   api_key_env: OPENROUTER_API_KEY
+  base_url: https://ai-gateway.vercel.sh/v1
+  api_key_env: AI_GATEWAY_API_KEY
+
 models:
   - id: anthropic/claude-sonnet-5
     label: Claude Sonnet 5

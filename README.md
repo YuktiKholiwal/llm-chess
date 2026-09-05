@@ -26,7 +26,7 @@ tasks  →  runner  →  extractor  →  verifier  →  scorer
   │          │           │             │           └─ results.json, RESULTS.md
   │          │           │             └─ verified.jsonl   python-chess + Stockfish
   │          │           └─ claims.jsonl                   reasoning → atomic claims
-  │          └─ runs.jsonl                                 OpenRouter, cached per (task, model)
+  │          └─ runs.jsonl                                 model calls, cached per (task, model)
   └─ tasks.jsonl                                           Lichess puzzles, stratified by rating
 ```
 
@@ -57,12 +57,19 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-**An OpenRouter key**, which covers every model including the extractor:
+**A provider key.** The default is the
+[Vercel AI Gateway](https://vercel.com/docs/ai-gateway), which covers every
+model in the config including the extractor:
 
 ```bash
 cp .env.example .env
-# paste a key from https://openrouter.ai/keys
+# paste a key from https://vercel.com/[team]/~/ai/api-keys
 ```
+
+Any OpenAI-compatible endpoint works — the Gateway and OpenRouter take an
+identical request body, and both report per-response cost, which is what lets
+the runner price a run without a local rate table. Switch by editing
+`provider.base_url` and `provider.api_key_env` in `config/models.yaml`.
 
 ---
 
@@ -120,8 +127,8 @@ is **not** controlled here and RESULTS.md says so.
 
 ### runner
 
-Asks each model for a move through OpenRouter, with a frozen, content-hashed
-prompt: FEN, ASCII board, side to move, and a required
+Asks each model for a move through the configured endpoint, with a frozen,
+content-hashed prompt: FEN, ASCII board, side to move, and a required
 `<reasoning>/<plan>/<move>` reply. Provider-side thinking is captured where the
 API exposes it and left null otherwise.
 
@@ -231,4 +238,4 @@ beside `v1` rather than editing `v1`.
 Python 3.12 · [uv](https://docs.astral.sh/uv/) ·
 [python-chess](https://python-chess.readthedocs.io) ·
 [Stockfish](https://stockfishchess.org) · httpx ·
-[OpenRouter](https://openrouter.ai) · JSONL
+[Vercel AI Gateway](https://vercel.com/docs/ai-gateway) · JSONL
