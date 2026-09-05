@@ -15,6 +15,7 @@ import {
   scorecardFor,
 } from "./chess-utils";
 import { costOf, formatTokens, formatUsd } from "./cost";
+import { MODELS, reasoningLane } from "./models";
 import { OPERA_GAME, demoAnalysis, demoMove, materialEval, plausibleIllegal, plyFromFen } from "./demo";
 import type { MoveRecord } from "./types";
 
@@ -236,5 +237,30 @@ describe("demo player", () => {
     const c = new Chess();
     for (const m of ["e4", "d5", "exd5"]) c.move(m);
     expect(materialEval(c.fen())).toBe(100);
+  });
+});
+
+describe("reasoning lane labels", () => {
+  it("never calls a provider-written summary raw thinking", () => {
+    // OpenAI is configured with reasoningSummary, so what arrives is the
+    // model's account of its reasoning rather than the reasoning. Labelling it
+    // "raw" would state something false in the UI.
+    const { label, note } = reasoningLane("openai");
+    expect(label).toBe("Reasoning summary");
+    expect(note).toMatch(/not the reasoning itself/);
+  });
+
+  it("distinguishes real thinking blocks from summaries", () => {
+    expect(reasoningLane("anthropic").label).not.toBe(reasoningLane("openai").label);
+  });
+
+  it("says plainly that demo output is not a model's", () => {
+    expect(reasoningLane("demo").note).toMatch(/Not model output/);
+  });
+
+  it("labels every vendor in the registry", () => {
+    for (const m of MODELS) {
+      expect(reasoningLane(m.vendor).label).toBeTruthy();
+    }
   });
 });

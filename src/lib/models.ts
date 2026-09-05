@@ -112,6 +112,43 @@ export const MODELS: ModelSpec[] = [
 export const DEFAULT_WHITE = "anthropic/claude-haiku-4.5";
 export const DEFAULT_BLACK = "google/gemini-3.7-flash";
 
+/**
+ * What a model's native reasoning stream actually is, per vendor.
+ *
+ * Anthropic streams real thinking blocks; OpenAI streams a summary the model
+ * wrote of its own reasoning; Google often streams nothing. Labelling all
+ * three "raw thinking" asserts something false about two of them. The same
+ * asymmetry is why the prompt mandates a "## Analysis" section, which IS
+ * comparable across providers.
+ */
+export function reasoningLane(vendor: ModelSpec["vendor"]): {
+  label: string;
+  note: string;
+} {
+  switch (vendor) {
+    case "anthropic":
+      return {
+        label: "Extended thinking",
+        note: "Thinking blocks, as the provider streamed them.",
+      };
+    case "openai":
+      return {
+        label: "Reasoning summary",
+        note: "A summary the model wrote of its own reasoning — not the reasoning itself.",
+      };
+    case "demo":
+      return {
+        label: "Scripted thinking",
+        note: "Written from the position by the offline demo player. Not model output.",
+      };
+    default:
+      return {
+        label: "Provider reasoning",
+        note: "Whatever this provider chose to stream, which varies by vendor and is often nothing.",
+      };
+  }
+}
+
 export function getModel(id: string): ModelSpec {
   return MODELS.find((m) => m.id === id) ?? MODELS[0];
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { RichText } from "@/components/RichText";
 import { ChevronDownIcon, ChevronIcon } from "@/components/ui";
 import { formatUsd } from "@/lib/cost";
-import { MODEL_GROUPS, type ModelSpec } from "@/lib/models";
+import { MODEL_GROUPS, reasoningLane, type ModelSpec } from "@/lib/models";
 import type { Color, LiveThought, MoveRecord, Scorecard } from "@/lib/types";
 
 const STAT_HELP: Record<string, string> = {
@@ -73,6 +73,9 @@ export function PlayerPanel({
   const analysis = streaming ? live.analysis : (lastMove?.analysis ?? "");
   const reasoning = streaming ? live.reasoning : (lastMove?.reasoning ?? "");
   const candidates = streaming ? live.candidates : [];
+  // Named per vendor, because this lane is raw thinking for one provider and a
+  // model-written summary for another.
+  const lane = reasoningLane(spec.vendor);
 
   useEffect(() => {
     if (streaming && scrollRef.current) {
@@ -172,11 +175,19 @@ export function PlayerPanel({
       {/* Analysis */}
       <div ref={scrollRef} className="scroll-thin min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-1.5">
         {analysis ? (
-          <div
-            className={`text-[13px] leading-[1.65] text-arena-text/90 ${streaming ? "cursor-blink" : ""}`}
-          >
-            <RichText text={analysis} />
-          </div>
+          <>
+            <p
+              className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.09em] text-arena-faint"
+              title="What the model wrote about the position, in the section the prompt requires of every provider. It is what the model said about the move, not a guaranteed-faithful account of how it chose it."
+            >
+              Model analysis
+            </p>
+            <div
+              className={`text-[13px] leading-[1.65] text-arena-text/90 ${streaming ? "cursor-blink" : ""}`}
+            >
+              <RichText text={analysis} />
+            </div>
+          </>
         ) : (
           <p className="text-[12.5px] text-arena-faint">
             {streaming ? "…" : "Waiting for this side to move."}
@@ -188,10 +199,11 @@ export function PlayerPanel({
             <button
               type="button"
               onClick={() => setShowReasoning((s) => !s)}
+              title={lane.note}
               className="flex items-center gap-1.5 text-[11.5px] text-arena-faint transition-colors hover:text-arena-text"
             >
               <ChevronIcon open={showReasoning} />
-              Raw thinking
+              {lane.label}
               <span className="font-mono-arena tabular-nums">
                 {reasoning.length.toLocaleString()}
               </span>
