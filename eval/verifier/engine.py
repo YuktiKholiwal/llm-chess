@@ -43,6 +43,23 @@ class Engine:
 
     def analyse(self, board: chess.Board, depth: int | None = None) -> dict:
         depth = depth or self.depth
+
+        # A finished game is settled by the rules, not by a search. Asking an
+        # engine gives "mate 0", which carries no sign -- so a position where
+        # the side to move has been mated reads as a loss for whoever is on
+        # move, and delivering mate scores as the worst move on the board.
+        outcome = board.outcome()
+        if outcome is not None:
+            if outcome.winner is None:
+                return {"cp": 0, "mate": None, "best": None, "depth": 0}
+            winner_is_white = outcome.winner == chess.WHITE
+            return {
+                "cp": MATE_CP if winner_is_white else -MATE_CP,
+                "mate": 0,
+                "best": None,
+                "depth": 0,
+            }
+
         key = (board.fen(), depth)
 
         with self._lock:

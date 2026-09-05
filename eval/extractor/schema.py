@@ -30,6 +30,8 @@ STRUCTURED_KINDS = (
     "piece_on_square",
     "castling_rights",
     "passed_pawn",
+    "line",
+    "best_move",
 )
 
 # What each kind needs before a handler can evaluate it. Fields not listed are
@@ -46,6 +48,8 @@ REQUIRED_FIELDS: dict[str, tuple[str, ...]] = {
     "piece_on_square": ("square",),
     "castling_rights": ("by",),
     "passed_pawn": ("square",),
+    "line": ("moves", "assertion"),
+    "best_move": (),
 }
 
 

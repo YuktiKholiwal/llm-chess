@@ -306,3 +306,33 @@ class TestCheckAsThreat:
     def test_the_side_not_to_move_cannot_be_answered(self):
         # That claim is about a position two plies away.
         assert h.check_available(board(self.POSITION), by="black") is None
+
+
+class TestTerminalPositions:
+    """A finished game is settled by the rules, not by a search.
+
+    Stockfish reports "mate 0" on a mated position, which carries no sign, so
+    reading it naively makes the position a loss for whoever is on move. That
+    inverts the score exactly when a model has just delivered mate -- charging
+    it the largest possible centipawn loss for the best possible move.
+    """
+
+    # Qd1-d8 is mate in one.
+    BEFORE_MATE = "7k/6pp/8/8/8/8/r4PPP/3Q2K1 w - - 1 2"
+
+    def test_a_mated_position_scores_for_the_winner(self, engine):
+        position = board(self.BEFORE_MATE)
+        position.push(chess.Move.from_uci("d1d8"))
+        assert position.is_checkmate()
+        assert engine.analyse(position)["cp"] == 10000
+
+    def test_delivering_mate_costs_nothing(self, engine):
+        assert engine.cp_loss(board(self.BEFORE_MATE), chess.Move.from_uci("d1d8")) == 0
+
+    def test_missing_the_mate_still_costs(self, engine):
+        assert engine.cp_loss(board(self.BEFORE_MATE), chess.Move.from_uci("g1h1")) > 1000
+
+    def test_a_draw_is_level_for_both_sides(self, engine):
+        stalemate = board("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1")
+        assert stalemate.is_stalemate()
+        assert engine.analyse(stalemate)["cp"] == 0

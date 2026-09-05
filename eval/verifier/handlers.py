@@ -42,6 +42,11 @@ PIECE_NAMES = {
 # that and narrow enough to still reject "I am a rook up" when level.
 MATERIAL_TOLERANCE = 0.5
 
+# Engines disagree with themselves by more than this between depths, and a
+# model that finds a move this close to the top has not made a mistake worth
+# recording as one.
+BEST_MOVE_TOLERANCE_CP = 30
+
 UCI_TOKEN = re.compile(r"\b([a-h][1-8][a-h][1-8][qrbn]?)\b", re.IGNORECASE)
 SAN_TOKEN = re.compile(
     r"(?:O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?"
@@ -270,6 +275,30 @@ def check_available(board: chess.Board, by=None, text: str | None = None) -> boo
     return any(board.gives_check(move) for move in board.legal_moves)
 
 
+def best_move(board: chess.Board, move=None, text: str | None = None, engine=None) -> bool | None:
+    """Whether the named move is as good as the engine's best.
+
+    Not "is it the top move": a claim that a move is strongest is wrong only if
+    the move is actually worse, and several moves are often equal. Anything
+    within a tolerance of the best line counts, so the handler does not punish
+    a model for preferring one of two equivalent winning moves.
+    """
+    if engine is None:
+        return None
+
+    candidate = None
+    for source in (move, text):
+        if source:
+            candidate = move_from_text(board, str(source))
+            if candidate is not None:
+                break
+    if candidate is None:
+        return None
+
+    loss = engine.cp_loss(board, candidate)
+    return None if loss is None else loss <= BEST_MOVE_TOLERANCE_CP
+
+
 def square_controlled(board: chess.Board, square: str, by) -> bool | None:
     target = parse_square(square)
     side = parse_color(by)
@@ -359,6 +388,7 @@ DISPATCH = {
     ),
     "castling_rights": lambda b, s, e: castling_rights(b, s.get("by"), s.get("side")),
     "passed_pawn": lambda b, s, e: passed_pawn(b, s.get("square"), s.get("by")),
+    "best_move": lambda b, s, e: best_move(b, s.get("move"), s.get("text"), e),
 }
 
 
@@ -368,6 +398,7 @@ def verdict_for(
     engine=None,
     claim_type: str = "state",
     text: str | None = None,
+    played_move: str | None = None,
 ) -> bool | None:
     """The verdict on one structured claim, with negation applied last.
 
@@ -380,6 +411,13 @@ def verdict_for(
         return None
 
     kind = structured["kind"]
+    if kind == "line":
+        from .lines import check_line
+
+        return check_line(board, structured, engine, played_move).value
+    if kind == "best_move":
+        answer = best_move(board, structured.get("move"), text, engine)
+        return (not answer) if (answer is not None and is_negated(structured)) else answer
     # A check asserted as a threat is about a move, not about the position now.
     if kind == "check" and claim_type == "threat":
         answer = check_available(board, structured.get("by"), text)
