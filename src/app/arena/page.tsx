@@ -225,7 +225,7 @@ export default function Arena() {
       />
 
       {/* Three columns */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(270px,1fr)_auto_minmax(270px,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(230px,330px)_auto_minmax(230px,330px)] lg:justify-center">
         <PlayerPanel
           color="w"
           spec={white}
