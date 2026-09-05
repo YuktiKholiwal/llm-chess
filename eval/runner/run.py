@@ -75,31 +75,31 @@ class Budget:
                 )
 
 
-def stratified(tasks: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
-    """Takes `limit` tasks round-robin across rating bands.
+def stratified(tasks: list[dict[str, Any]], limit: int = 0) -> list[dict[str, Any]]:
+    """Orders tasks round-robin across rating bands, optionally truncated.
 
-    A prefix would follow the bank's ordering and quietly test only the lowest
-    band or two, so a `--limit 12` smoke run would say nothing about the rest.
+    The bank is stored band by band, so any prefix of it is all easy puzzles.
+    Ordering this way means a `--limit 12` smoke run spans every band -- and,
+    more importantly, that a run cut short partway through still leaves a
+    balanced sample rather than one weighted to the bands that happen to sort
+    first.
     """
-    if limit <= 0 or limit >= len(tasks):
-        return tasks
-
     bands: dict[Any, list[dict[str, Any]]] = {}
     for task in tasks:
         bands.setdefault(task["rating_band"], []).append(task)
 
     out: list[dict[str, Any]] = []
     depth = 0
-    while len(out) < limit:
+    while True:
         added = False
         for band in sorted(bands):
-            if depth < len(bands[band]) and len(out) < limit:
+            if depth < len(bands[band]):
                 out.append(bands[band][depth])
                 added = True
         if not added:
             break
         depth += 1
-    return out
+    return out[:limit] if limit > 0 else out
 
 
 def ask(
@@ -197,10 +197,14 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
         write_jsonl(RUNS_PATH, existing)
 
     done = {(row["task_id"], row["model"]) for row in existing}
+    # Task-major rather than model-major, over band-interleaved tasks. A run
+    # that dies partway -- a cost cap, an exhausted account, a provider outage
+    # -- then leaves every model at roughly the same coverage of every band,
+    # instead of the last model in the list holding nothing but easy puzzles.
     work = [
         (task, spec)
-        for spec in cfg.models
         for task in tasks
+        for spec in cfg.models
         if (task["id"], spec.id) not in done
     ]
 
@@ -252,7 +256,9 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
     write_manifest(
         "run",
         {
-            "models": [spec.id for spec in cfg.models],
+            "models": [
+                {"id": spec.id, "reasoning": spec.reasoning} for spec in cfg.models
+            ],
             "tasks": len(tasks),
             "requested": len(work),
             "prompt": {"version": prompt.PROMPT_VERSION, "hash": prompt.prompt_hash()},

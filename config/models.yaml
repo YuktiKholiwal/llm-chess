@@ -1,6 +1,11 @@
-# Every model is queried through OpenRouter with a byte-identical prompt, so a
-# difference in scores is a difference in the model rather than in how it was
-# asked. Adding a model here is all that is needed to include it in a run.
+# Every model is queried with a byte-identical prompt, so a difference in scores
+# is a difference in the model rather than in how it was asked. Adding a model
+# here is all that is needed to include it in a run.
+#
+# Reasoning effort is `low` throughout. At `medium` these models spend five to
+# thirty thousand output tokens per puzzle, which costs several times more and
+# pushes some of them past their output ceiling before they can answer. Effort
+# is part of the measurement, so it is recorded in the run manifest.
 
 provider:
   # Any OpenAI-compatible endpoint. The Vercel AI Gateway and OpenRouter both
@@ -17,15 +22,19 @@ provider:
 models:
   - id: anthropic/claude-sonnet-5
     label: Claude Sonnet 5
-    reasoning: { effort: medium }
+    reasoning: { effort: low }
 
   - id: openai/gpt-5.2
     label: GPT-5.2
-    reasoning: { effort: medium }
+    reasoning: { effort: low }
 
-  - id: deepseek/deepseek-v4-pro-0813
-    label: DeepSeek V4 Pro
-    reasoning: { effort: medium }
+  # The open-weight slot. deepseek-v4-pro was tried first and cannot be used:
+  # at both medium and low effort it spends its entire output budget on
+  # reasoning and is truncated before it ever writes a <move>, on every task.
+  # Qwen terminates, and exposes reasoning content the way the runner expects.
+  - id: qwen/qwen3.8-2.4t-a95b
+    label: Qwen3.8 A95B
+    reasoning: { effort: low }
 
 # Claim extraction, and resolving a prose plan to its first move. Both jobs are
 # mechanical rewriting rather than chess, so a cheap model is the right tool --
@@ -45,7 +54,7 @@ engine:
 
 limits:
   # Checked before every request; the run stops rather than overshooting.
-  max_cost_usd: 25.0
+  max_cost_usd: 40.0
   request_timeout_s: 300.0
   # Rate limits and provider blips are expected over ~800 calls and are retried
   # with backoff. Auth and access failures are not retried at all.
@@ -55,7 +64,7 @@ limits:
   abort_after_consecutive_errors: 3
   # Requests in flight at once. The cost cap is checked before each is
   # submitted, so a run can overshoot it by at most this many calls.
-  concurrency: 6
+  concurrency: 12
 
 tasks:
   source_url: https://database.lichess.org/lichess_db_puzzle.csv.zst
