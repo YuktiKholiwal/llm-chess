@@ -13,7 +13,7 @@ discarding those claims would flatter it.
 
 from __future__ import annotations
 
-CLAIM_TYPES = ("state", "threat", "plan", "unverifiable")
+CLAIM_TYPES = ("state", "line", "best_move", "unverifiable")
 
 # Every structured kind the verifier implements a handler for. The extractor is
 # shown this list; anything outside it is left unstructured on purpose, so a
@@ -32,6 +32,7 @@ STRUCTURED_KINDS = (
     "passed_pawn",
     "line",
     "best_move",
+    "unverifiable",
 )
 
 # What each kind needs before a handler can evaluate it. Fields not listed are
@@ -50,6 +51,7 @@ REQUIRED_FIELDS: dict[str, tuple[str, ...]] = {
     "passed_pawn": ("square",),
     "line": ("moves", "assertion"),
     "best_move": (),
+    "unverifiable": (),
 }
 
 

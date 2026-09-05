@@ -29,10 +29,12 @@ from . import plans
 from .handlers import verdict_for
 from .engine import Engine
 
-VERIFIABLE_TYPES = ("state", "threat")
+VERIFIABLE_TYPES = ("state", "line", "best_move")
 
 
-def verify_claim(board: chess.Board, claim: dict, engine: Engine) -> bool | None:
+def verify_claim(
+    board: chess.Board, claim: dict, engine: Engine, played_move: str | None
+) -> bool | None:
     if claim["type"] not in VERIFIABLE_TYPES:
         return None
     return verdict_for(
@@ -41,6 +43,7 @@ def verify_claim(board: chess.Board, claim: dict, engine: Engine) -> bool | None
         engine,
         claim_type=claim["type"],
         text=claim.get("text"),
+        played_move=played_move,
     )
 
 
@@ -119,23 +122,16 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
 
         rows: list[dict[str, Any]] = []
         for claim in claims_by_run.get(key, []):
-            verdict = verify_claim(board, claim, engine)
-            # A plan claim is scored by how much the engine dislikes the move
-            # it implies, not by a true/false verdict.
-            claim_plan_cp_loss = None
-            if claim["type"] == "plan":
-                implied, extra = plans.resolve(client, cfg, board, claim["text"])
-                cost += extra
-                if implied is not None:
-                    claim_plan_cp_loss = engine.cp_loss(board, implied)
-
             rows.append(
                 {
                     **base,
                     "claim_id": claim["claim_id"],
                     "type": claim["type"],
-                    "verdict": verdict,
-                    "plan_cp_loss": claim_plan_cp_loss,
+                    "verdict": verify_claim(board, claim, engine, played),
+                    # Plans are scored once per task from the stated <plan>,
+                    # which is where a plan lives now that claims are typed
+                    # state / line / best_move / unverifiable.
+                    "plan_cp_loss": None,
                 }
             )
 

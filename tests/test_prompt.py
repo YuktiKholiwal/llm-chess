@@ -61,3 +61,43 @@ def test_system_prompt_fixes_uci_and_the_three_sections():
     assert "UCI" in prompt.SYSTEM
     for tag in ("<reasoning>", "<plan>", "<move>"):
         assert tag in prompt.SYSTEM
+
+
+class TestExtractorPrompt:
+    """v2 is frozen too. It replaced v1 after triage showed that only about a
+    quarter of unverifiable claims were genuinely vague; half were move lines
+    v1 had no way to express."""
+
+    def test_is_frozen(self):
+        from eval.extractor import prompt as extractor
+
+        assert extractor.PROMPT_VERSION == "v2"
+        assert extractor.prompt_hash() == "dfaa4b40f5ab"
+
+    def test_requires_a_structured_form_for_every_claim(self):
+        from eval.extractor import prompt as extractor
+
+        assert "EVERY claim gets a `structured` object" in extractor.SYSTEM
+
+    def test_still_forbids_the_extractor_from_judging(self):
+        from eval.extractor import prompt as extractor
+
+        assert "transcriber, not a referee" in extractor.SYSTEM
+        assert "even when it is wrong" in extractor.SYSTEM
+
+    def test_documents_every_claim_type(self):
+        from eval.extractor import prompt as extractor
+        from eval.extractor.schema import CLAIM_TYPES
+
+        for claim_type in CLAIM_TYPES:
+            assert claim_type.upper() in extractor.SYSTEM
+
+    def test_carries_a_worked_example_of_each_type(self):
+        from eval.extractor import prompt as extractor
+
+        for kind in ("pinned", "line", "best_move", "unverifiable"):
+            assert f'"kind": "{kind}"' in extractor.SYSTEM
+        # Including the two the triage specifically called for.
+        assert '"prefix": "played"' in extractor.SYSTEM
+        assert '"Kf3/Ke3"' in extractor.SYSTEM
+        assert '"material_delta"' in extractor.SYSTEM

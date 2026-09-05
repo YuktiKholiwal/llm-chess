@@ -1,0 +1,26 @@
+{
+  "anthropic/claude-sonnet-5": {
+    "claims": 1182,
+    "true": 218,
+    "false": 112,
+    "unverifiable": 852,
+    "unverifiable_rate": 0.7208,
+    "claim_accuracy": 0.6606
+  },
+  "openai/gpt-5.2": {
+    "claims": 1620,
+    "true": 259,
+    "false": 134,
+    "unverifiable": 1227,
+    "unverifiable_rate": 0.7574,
+    "claim_accuracy": 0.659
+  },
+  "qwen/qwen3.8-2.4t-a95b": {
+    "claims": 2114,
+    "true": 384,
+    "false": 233,
+    "unverifiable": 1497,
+    "unverifiable_rate": 0.7081,
+    "claim_accuracy": 0.6224
+  }
+}

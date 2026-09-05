@@ -411,6 +411,8 @@ def verdict_for(
         return None
 
     kind = structured["kind"]
+    if kind == "unverifiable":
+        return None
     if kind == "line":
         from .lines import check_line
 

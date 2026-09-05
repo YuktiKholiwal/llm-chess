@@ -72,10 +72,10 @@ def collect(cfg: Config) -> dict[str, list[TaskOutcome]]:
                 claims_true=sum(1 for c in claims if c["verdict"] is True),
                 claims_false=sum(1 for c in claims if c["verdict"] is False),
                 claims_unverifiable=sum(1 for c in claims if c["verdict"] is None),
-                plan_cp_losses=tuple(
-                    c["plan_cp_loss"]
-                    for c in claims
-                    if c["type"] == "plan" and c.get("plan_cp_loss") is not None
+                plan_cp_losses=(
+                    (head["plan_move_cp_loss"],)
+                    if head.get("plan_move_cp_loss") is not None
+                    else ()
                 ),
                 played_cp_loss=head.get("played_cp_loss"),
                 plan_move=head.get("plan_move"),
