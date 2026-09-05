@@ -15,6 +15,7 @@ const STAT_HELP: Record<string, string> = {
   Cost: "Estimated spend for this side, at live AI Gateway rates.",
 };
 
+/** Value then label on one baseline — four of these read as a line, not a grid. */
 function Stat({
   label,
   value,
@@ -25,12 +26,9 @@ function Stat({
   tone?: "bad" | "warn";
 }) {
   return (
-    <div className="flex flex-col gap-1" title={STAT_HELP[label]}>
-      <span className="text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
-        {label}
-      </span>
+    <span className="flex items-baseline gap-1" title={STAT_HELP[label]}>
       <span
-        className={`font-mono-arena text-[13px] tabular-nums ${
+        className={`font-mono-arena text-[12px] tabular-nums ${
           tone === "bad" && value !== 0
             ? "text-arena-bad"
             : tone === "warn" && value !== 0
@@ -40,7 +38,10 @@ function Stat({
       >
         {value}
       </span>
-    </div>
+      <span className="text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
+        {label}
+      </span>
+    </span>
   );
 }
 
@@ -205,28 +206,28 @@ export function PlayerPanel({
         )}
       </div>
 
-      {/* Scorecard. Accuracy leads because it is the one number a non-player
-          can read; ACPL lives in its tooltip for people who want it. */}
-      <div className="border-t border-arena-line px-3 py-3">
+      {/* Scorecard, one line. Accuracy leads because it is the one number a
+          non-player can read; ACPL lives in its tooltip for people who want it. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5 border-t border-arena-line px-3 py-2.5">
         <div
-          className="mb-3 flex items-baseline gap-2"
+          className="flex items-baseline gap-1.5"
           title={
             score.moves
               ? `Average centipawn loss: ${score.acpl}. How close this model's moves were to Stockfish's best.`
               : "No moves scored yet"
           }
         >
-          <span className="font-mono-arena text-[24px] font-medium leading-none tracking-[-0.02em] tabular-nums text-arena-text">
+          <span className="font-mono-arena text-[19px] font-medium leading-none tracking-[-0.02em] tabular-nums text-arena-text">
             {score.moves && score.accuracy ? score.accuracy.toFixed(1) : "—"}
             {score.moves && score.accuracy ? (
-              <span className="text-[15px] text-arena-faint">%</span>
+              <span className="text-[12px] text-arena-faint">%</span>
             ) : null}
           </span>
           <span className="text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
             accuracy
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-1.5">
           <Stat label="Blunders" value={score.blunders} tone="bad" />
           <Stat label="Illegal" value={score.illegalAttempts} tone="warn" />
           <Stat

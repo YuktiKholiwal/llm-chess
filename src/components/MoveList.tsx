@@ -62,10 +62,10 @@ const LEGEND: { q: MoveQuality; label: string }[] = [
   { q: "blunder", label: "Blunder" },
 ];
 
-/** The coloured dots mean nothing without this. */
-export function MoveLegend() {
+/** The coloured dots mean nothing without this, so it ships inside the panel. */
+function Legend() {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[10.5px] text-arena-faint">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-arena-line px-3 py-2 text-[10.5px] text-arena-faint">
       {LEGEND.map(({ q, label }) => (
         <span key={q} className="flex items-center gap-1.5">
           <span
@@ -93,24 +93,24 @@ export function MoveList({ moves }: { moves: MoveRecord[] }) {
   for (let i = 0; i < moves.length; i += 2) rows.push(moves.slice(i, i + 2));
 
   return (
-    <div
-      ref={ref}
-      className="scroll-thin h-full min-h-0 overflow-y-auto rounded-xl border border-arena-border bg-arena-panel p-2"
-    >
-      {rows.length === 0 && (
-        <p className="px-1.5 py-2 text-[12px] text-arena-faint">
-          Moves appear here, colour-coded by how good Stockfish thinks they are.
-        </p>
-      )}
-      {rows.map((row, i) => (
-        <div key={i} className="flex items-center gap-1">
-          <span className="w-6 shrink-0 text-right font-mono-arena text-[11px] tabular-nums text-arena-faint">
-            {i + 1}
-          </span>
-          <Cell move={row[0]} />
-          <Cell move={row[1]} />
-        </div>
-      ))}
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-arena-border bg-arena-panel">
+      <div ref={ref} className="scroll-thin min-h-0 flex-1 overflow-y-auto p-2">
+        {rows.length === 0 && (
+          <p className="px-1.5 py-2 text-[12px] text-arena-faint">
+            Moves appear here, colour-coded by how good Stockfish thinks they are.
+          </p>
+        )}
+        {rows.map((row, i) => (
+          <div key={i} className="flex items-center gap-1">
+            <span className="w-6 shrink-0 text-right font-mono-arena text-[11px] tabular-nums text-arena-faint">
+              {i + 1}
+            </span>
+            <Cell move={row[0]} />
+            <Cell move={row[1]} />
+          </div>
+        ))}
+      </div>
+      <Legend />
     </div>
   );
 }

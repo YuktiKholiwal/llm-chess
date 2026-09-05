@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import {
   Button,
+  ChevronIcon,
   DemoIcon,
-  Disclosure,
+  Divider,
   Label,
-  Panel,
   PauseIcon,
   PlayIcon,
   ResetIcon,
@@ -48,11 +49,12 @@ export function Controls({
   promptVersion: PromptVersion;
   setPromptVersion: (v: PromptVersion) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const finished = status === "finished";
   const busy = status === "thinking";
 
-  // Shown on the closed fold, so the conditions a run was played under stay
-  // legible without opening anything.
+  // Kept on the closed bar, so the conditions a game is being played under
+  // stay legible without opening anything.
   const summary = [
     mode === "assisted" ? "legal moves shown" : "legal moves hidden",
     promptVersion,
@@ -60,15 +62,12 @@ export function Controls({
   ].join(" · ");
 
   return (
-    <Panel>
-      {/* Transport. The only row a first-time visitor has to understand. */}
+    <div className="shrink-0 rounded-xl border border-arena-border bg-arena-panel">
+      {/* One line: what you can do, and what conditions you are doing it under.
+          Everything a first-time visitor needs is on the left of it. */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
         {running ? (
-          <Button
-            onClick={onPause}
-            variant="primary"
-            title="Stop after the current move"
-          >
+          <Button onClick={onPause} variant="primary" title="Stop after the current move">
             <PauseIcon />
             Pause
           </Button>
@@ -90,23 +89,36 @@ export function Controls({
           <ResetIcon />
           New
         </Button>
-
         <Button
           onClick={onDemo}
           variant="ghost"
-          className="ml-auto"
           title="Replay a real master game — no API calls, no cost"
         >
           <DemoIcon />
           Demo
         </Button>
+
+        <div className="ml-auto flex items-center gap-2">
+          <Divider />
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="flex items-center gap-2 rounded-md px-1.5 py-1 text-[11.5px] text-arena-faint transition-colors hover:text-arena-dim"
+            title="Change what is being measured"
+          >
+            <span className="hidden truncate sm:block">{summary}</span>
+            <span className="sm:hidden">Conditions</span>
+            <ChevronIcon open={open} />
+          </button>
+        </div>
       </div>
 
-      {/* The knobs below change what is being measured, not how it looks. They
-          are experimental conditions, so they stay folded away rather than
-          asking a first-time visitor to have an opinion about them. */}
-      <Disclosure label="Conditions" summary={summary}>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+      {/* These knobs change what is being measured, not how it looks. They are
+          experimental conditions, so they stay closed rather than asking a
+          first-time visitor to have an opinion about them. */}
+      {open && (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-arena-line px-3 py-3">
           <div className="flex items-center gap-2">
             <Label>Legal moves</Label>
             <Segmented
@@ -154,27 +166,25 @@ export function Controls({
             />
             Stockfish grading
           </label>
-        </div>
 
-        {/* Playback speed changes nothing about the measurement, so it sits
-            below the hairline rather than among the conditions. */}
-        <div className="mt-3 flex items-center gap-2.5 border-t border-arena-line pt-3">
-          <Label>Pace</Label>
-          <input
-            type="range"
-            min={0}
-            max={5000}
-            step={250}
-            value={delayMs}
-            onChange={(e) => setDelayMs(Number(e.target.value))}
-            className="h-1 w-32 cursor-pointer accent-arena-text"
-            title="Pause between moves"
-          />
-          <span className="font-mono-arena text-[11.5px] tabular-nums text-arena-dim">
-            {(delayMs / 1000).toFixed(1)}s
-          </span>
+          <div className="flex items-center gap-2.5">
+            <Label>Pace</Label>
+            <input
+              type="range"
+              min={0}
+              max={5000}
+              step={250}
+              value={delayMs}
+              onChange={(e) => setDelayMs(Number(e.target.value))}
+              className="h-1 w-28 cursor-pointer accent-arena-text"
+              title="Pause between moves"
+            />
+            <span className="font-mono-arena text-[11.5px] tabular-nums text-arena-dim">
+              {(delayMs / 1000).toFixed(1)}s
+            </span>
+          </div>
         </div>
-      </Disclosure>
-    </Panel>
+      )}
+    </div>
   );
 }

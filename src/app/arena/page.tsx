@@ -6,7 +6,7 @@ import type { Arrow } from "react-chessboard";
 import { Board } from "@/components/Board";
 import { Controls } from "@/components/Controls";
 import { EvalBar, EvalSummary } from "@/components/EvalBar";
-import { MoveList, MoveLegend } from "@/components/MoveList";
+import { MoveList } from "@/components/MoveList";
 import { PlayerPanel } from "@/components/PlayerPanel";
 import { ArrowLeftIcon, Badge } from "@/components/ui";
 import { useEngine } from "@/hooks/useEngine";
@@ -16,7 +16,14 @@ import { costOf, formatTokens, formatUsd, type Pricing } from "@/lib/cost";
 import { getModel } from "@/lib/models";
 import type { Color } from "@/lib/types";
 
-const BOARD_PX = 480;
+/**
+ * The board is the tallest fixed thing on the page, so it gives way rather than
+ * pushing the move list off the bottom on a short window. 480px is the ceiling;
+ * the subtrahend is everything stacked above and below it.
+ */
+const BOARD = "clamp(260px, calc(100vh - 320px), 480px)";
+/** Board plus the eval bar beside it, so the rows above and below line up. */
+const COLUMN = `calc(${BOARD} + 30px)`;
 
 export default function Arena() {
   const match = useMatch();
@@ -120,7 +127,7 @@ export default function Arena() {
   );
 
   return (
-    <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-4 p-4">
+    <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 p-4">
       {/* Header. Match settings live in Controls — repeating them here just
           added chrome without adding a place to change them. */}
       <header className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-arena-border pb-3">
@@ -197,8 +204,28 @@ export default function Arena() {
         </div>
       </header>
 
+      {/* The primary action sits directly under the header rather than below a
+          480px board, where a first-time visitor had to scroll to find it. */}
+      <Controls
+        status={match.status}
+        running={match.status === "thinking" || match.isRunning}
+        mode={match.mode}
+        setMode={match.setMode}
+        delayMs={match.moveDelayMs}
+        setDelayMs={match.setMoveDelayMs}
+        engineOn={engineOn}
+        setEngineOn={setEngineOn}
+        onStart={match.start}
+        onPause={match.pause}
+        onStep={match.step}
+        onReset={() => match.reset(true)}
+        onDemo={match.startDemo}
+        promptVersion={match.promptVersion}
+        setPromptVersion={match.setPromptVersion}
+      />
+
       {/* Three columns */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(270px,1fr)_auto_minmax(270px,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(270px,1fr)_auto_minmax(270px,1fr)]">
         <PlayerPanel
           color="w"
           spec={white}
@@ -211,44 +238,21 @@ export default function Arena() {
           cost={costW}
         />
 
-        <div className="flex min-h-0 flex-col items-center gap-3.5">
-          <div className="flex w-full items-center justify-center" style={{ maxWidth: BOARD_PX + 36 }}>
+        <div
+          className="flex min-h-0 flex-col items-center gap-3"
+          style={{ "--board": BOARD, "--column": COLUMN } as React.CSSProperties}
+        >
+          <div className="flex w-[var(--column)] items-center justify-center">
             <EvalSummary cp={currentEval} active={engineOn} />
           </div>
-          <div
-            className="flex shrink-0 items-stretch gap-3"
-            style={{ height: BOARD_PX }}
-          >
+          <div className="flex h-[var(--board)] shrink-0 items-stretch gap-3">
             <EvalBar cp={currentEval} active={engineOn} />
-            <div style={{ width: BOARD_PX }}>
+            <div className="w-[var(--board)]">
               <Board fen={match.fen} arrows={arrows} />
             </div>
           </div>
-          <div className="w-full shrink-0" style={{ maxWidth: BOARD_PX + 36 }}>
-            <Controls
-              status={match.status}
-              running={match.status === "thinking" || match.isRunning}
-              mode={match.mode}
-              setMode={match.setMode}
-              delayMs={match.moveDelayMs}
-              setDelayMs={match.setMoveDelayMs}
-              engineOn={engineOn}
-              setEngineOn={setEngineOn}
-              onStart={match.start}
-              onPause={match.pause}
-              onStep={match.step}
-              onReset={() => match.reset(true)}
-              onDemo={match.startDemo}
-              promptVersion={match.promptVersion}
-              setPromptVersion={match.setPromptVersion}
-            />
-          </div>
-          <div
-            className="flex min-h-0 w-full flex-1 flex-col gap-2"
-            style={{ maxWidth: BOARD_PX + 36 }}
-          >
+          <div className="min-h-0 w-[var(--column)] flex-1">
             <MoveList moves={match.moves} />
-            <MoveLegend />
           </div>
         </div>
 
