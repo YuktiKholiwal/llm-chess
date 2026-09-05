@@ -46,6 +46,13 @@ class TaskOutcome:
     claims_true: int
     claims_false: int
     claims_unverifiable: int
+    """Split by claim type, so a fact about the board and a calculated line can
+    be scored apart. They are different abilities and a single figure hides
+    which one a model is actually good at."""
+    state_true: int
+    state_false: int
+    line_true: int
+    line_false: int
     plan_cp_losses: tuple[int, ...]
     played_cp_loss: int | None
     plan_move: str | None
@@ -92,6 +99,12 @@ class Scores:
     claims_false: int
     claims_unverifiable: int
     claims_per_task: float
+    state_accuracy: float | None
+    state_accuracy_ci: tuple[float, float] | None
+    state_claims: int
+    line_accuracy: float | None
+    line_accuracy_ci: tuple[float, float] | None
+    line_claims: int
     plan_cp_loss_median: float | None
     played_cp_loss_median: float | None
     consistency: float | None
@@ -197,6 +210,20 @@ def summarise(outcomes: list[TaskOutcome], scope: str, model: str, label: str) -
         else None
     )
 
+    def slice_accuracy(hit: str, miss: str):
+        true_count = sum(getattr(o, hit) for o in outcomes)
+        false_count = sum(getattr(o, miss) for o in outcomes)
+        total = true_count + false_count
+        if total == 0:
+            return None, None, 0
+        interval = bootstrap_ratio_ci(
+            [(getattr(o, hit), getattr(o, hit) + getattr(o, miss)) for o in outcomes]
+        )
+        return true_count / total, interval, total
+
+    state_accuracy, state_ci, state_total = slice_accuracy("state_true", "state_false")
+    line_accuracy, line_ci, line_total = slice_accuracy("line_true", "line_false")
+
     consistencies = [o.consistent for o in outcomes if o.consistent is not None]
     plan_losses = [loss for o in outcomes for loss in o.plan_cp_losses]
     played_losses = [o.played_cp_loss for o in outcomes if o.played_cp_loss is not None]
@@ -222,6 +249,12 @@ def summarise(outcomes: list[TaskOutcome], scope: str, model: str, label: str) -
         claims_false=false_total,
         claims_unverifiable=unverifiable_total,
         claims_per_task=claims_total / n,
+        state_accuracy=state_accuracy,
+        state_accuracy_ci=state_ci,
+        state_claims=state_total,
+        line_accuracy=line_accuracy,
+        line_accuracy_ci=line_ci,
+        line_claims=line_total,
         plan_cp_loss_median=_median(plan_losses),
         played_cp_loss_median=_median(played_losses),
         consistency=_mean(1.0 if c else 0.0 for c in consistencies) if consistencies else None,

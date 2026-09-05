@@ -14,6 +14,7 @@ reader would otherwise have to discover by reading the source.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ from ..verifier.handlers import move_from_text
 from .aggregate import Scores, TaskOutcome, by_band, by_theme, separated, summarise
 
 RESULTS_MD = Path("RESULTS.md")
+BASELINE_PATH = Path("data/baseline_v1.json")
 # The spread below which the eval has not separated the models.
 KILL_CHECK_POINTS = 5.0
 
@@ -72,6 +74,10 @@ def collect(cfg: Config) -> dict[str, list[TaskOutcome]]:
                 claims_true=sum(1 for c in claims if c["verdict"] is True),
                 claims_false=sum(1 for c in claims if c["verdict"] is False),
                 claims_unverifiable=sum(1 for c in claims if c["verdict"] is None),
+                state_true=sum(1 for c in claims if c["type"] == "state" and c["verdict"] is True),
+                state_false=sum(1 for c in claims if c["type"] == "state" and c["verdict"] is False),
+                line_true=sum(1 for c in claims if c["type"] == "line" and c["verdict"] is True),
+                line_false=sum(1 for c in claims if c["type"] == "line" and c["verdict"] is False),
                 plan_cp_losses=(
                     (head["plan_move_cp_loss"],)
                     if head.get("plan_move_cp_loss") is not None
@@ -153,6 +159,50 @@ def breakdown_table(rows: list[Scores], heading: str) -> str:
     return "\n".join(lines)
 
 
+def separation(scores: list[Scores], metric: str, ci_field: str, label: str) -> str:
+    """Whether a metric separates the models, on both tests that matter.
+
+    A spread wide enough to notice and intervals that do not overlap are
+    different questions, and a metric passes only by answering both. Reporting
+    a five-point lead the sample cannot resolve would be the exact error the
+    kill check exists to catch.
+    """
+    measured = [s for s in scores if getattr(s, metric) is not None]
+    if len(measured) < 2:
+        return f"Fewer than two models produced {label}, so nothing can be compared."
+
+    ranked = sorted(measured, key=lambda s: getattr(s, metric), reverse=True)
+    spread = (getattr(ranked[0], metric) - getattr(ranked[-1], metric)) * 100
+    overlapping = [
+        f"{a.label}/{b.label}"
+        for i, a in enumerate(ranked)
+        for b in ranked[i + 1 :]
+        if getattr(a, ci_field) and getattr(b, ci_field)
+        and not separated(getattr(a, ci_field), getattr(b, ci_field))
+    ]
+
+    wide = spread > KILL_CHECK_POINTS
+    clean = not overlapping
+    verdict = (
+        "**separates the three models**"
+        if wide and clean
+        else "**does not separate the three models**"
+    )
+
+    detail = (
+        f"spans {spread:.1f} points ({pct(getattr(ranked[-1], metric))} "
+        f"{ranked[-1].label} to {pct(getattr(ranked[0], metric))} {ranked[0].label})"
+    )
+    reason = []
+    if not wide:
+        reason.append(f"the spread is within {KILL_CHECK_POINTS:.0f} points")
+    if overlapping:
+        reason.append("intervals overlap for " + ", ".join(overlapping))
+    tail = "; ".join(reason) if reason else "the spread clears 5 points and no intervals overlap"
+
+    return f"{label.capitalize()} {detail} and {verdict} — {tail}."
+
+
 def kill_check(scores: list[Scores]) -> str:
     """States plainly whether the eval separated the models.
 
@@ -208,6 +258,46 @@ def kill_check(scores: list[Scores]) -> str:
         parts.append("No two models' confidence intervals overlap.")
 
     return " ".join(parts)
+
+
+def slice_table(scores: list[Scores]) -> str:
+    lines = [
+        "| Model | Overall | State claims | Line claims |",
+        "|---|---|---|---|",
+    ]
+    for s in scores:
+        state = (
+            f"{pct(s.state_accuracy)} (n={s.state_claims})" if s.state_claims else "—"
+        )
+        line = f"{pct(s.line_accuracy)} (n={s.line_claims})" if s.line_claims else "—"
+        lines.append(
+            f"| {s.label} | {pct(s.claim_accuracy)} (n={s.claims_true + s.claims_false}) "
+            f"| {state} | {line} |"
+        )
+    return "\n".join(lines)
+
+
+def baseline_table(scores: list[Scores]) -> str:
+    """The v1 numbers beside the v2 ones, read from the snapshot on disk."""
+    try:
+        baseline = json.loads(BASELINE_PATH.read_text())
+    except (OSError, ValueError):
+        return "_No v1 baseline on disk to compare against._"
+
+    lines = [
+        "| Model | Unverifiable v1 | Unverifiable v2 | Claim accuracy v1 | Claim accuracy v2 |",
+        "|---|---|---|---|---|",
+    ]
+    for s in scores:
+        was = baseline.get(s.model)
+        if not was:
+            continue
+        lines.append(
+            f"| {s.label} | {was['unverifiable_rate'] * 100:.1f}% "
+            f"| {pct(s.unverifiable_rate)} "
+            f"| {was['claim_accuracy'] * 100:.1f}% | {pct(s.claim_accuracy)} |"
+        )
+    return "\n".join(lines)
 
 
 def render(cfg: Config, overall: list[Scores], bands: list[Scores], themes: list[Scores]) -> str:
@@ -267,6 +357,29 @@ whole tasks rather than individual claims, because claims from one trace are
 correlated — a model that misreads a position is usually wrong about it several
 times over — and resampling claims independently would report an interval far
 narrower than the evidence supports.
+
+## State claims against line claims
+
+A state claim is a fact about the position as it stands ("the knight on f6 is
+pinned"). A line claim is a calculated variation ("if Qxc4, Nxc4 wins the queen
+for a rook"). They are different abilities, and a single accuracy figure hides
+which one a model actually has.
+
+{slice_table(ranked)}
+
+{separation(overall, "line_accuracy", "line_accuracy_ci", "line-claim accuracy")}
+
+{separation(overall, "state_accuracy", "state_accuracy_ci", "state-claim accuracy")}
+
+## Extraction before and after
+
+{baseline_table(ranked)}
+
+v1 of the extractor left roughly three quarters of claims unstructured, so
+almost everything a model calculated went unchecked. v2 requires a structured
+form for every claim and adds a `line` type for conditional variations. The
+claims are the same reasoning traces in both rows — only the extraction and
+verification changed.
 
 ## By rating band
 
