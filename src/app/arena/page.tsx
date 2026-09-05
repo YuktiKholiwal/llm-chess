@@ -14,6 +14,7 @@ import { useMatch } from "@/hooks/useMatch";
 import { sanToSquares, scorecardFor } from "@/lib/chess-utils";
 import { costOf, formatTokens, formatUsd, type Pricing } from "@/lib/cost";
 import { getModel } from "@/lib/models";
+import { lastByColor, reviewAt, stepPly } from "@/lib/review";
 import type { Color } from "@/lib/types";
 
 /**
@@ -64,18 +65,39 @@ export default function Arena() {
   // count, or the selector is disabled before the match even starts.
   const locked = match.moves.some((m) => !m.book);
 
-  const lastMove = match.moves.at(-1) ?? null;
-  const lastByColor = (c: Color) =>
-    [...match.moves].reverse().find((m) => m.color === c) ?? null;
+  // Selecting a past ply rewinds the whole page to that moment. It is view
+  // state, not match state, so it lives here rather than in the match loop.
+  const [selectedPly, setSelectedPly] = useState<number | null>(null);
+  const view = useMemo(
+    () => reviewAt(match.moves, selectedPly, match.fen),
+    [match.moves, selectedPly, match.fen],
+  );
+  const reviewing = view.ply !== null;
+  const lastMove = view.move;
 
-  const currentEval = useMemo(() => {
-    const graded = [...match.moves]
-      .reverse()
-      .find((m) => typeof m.evalAfter === "number");
-    return graded?.evalAfter ?? 0;
+  // Stepping a move list with the arrow keys is a convention older than the
+  // web; without it, reading a game means clicking forty times.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return;
+
+      if (e.key === "Escape") setSelectedPly(null);
+      else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        setSelectedPly((p) => stepPly(match.moves, p, e.key === "ArrowLeft" ? -1 : 1));
+      } else return;
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [match.moves]);
 
-  /** Solid arrow for the move just played, ghost arrows for live candidates. */
+  /**
+   * Solid arrow for the move on the board, ghost arrows for what the model
+   * currently has under consideration. The ghosts belong to the live position
+   * only -- drawn over a rewound board they would describe a different game.
+   */
   const arrows = useMemo<Arrow[]>(() => {
     const out: Arrow[] = [];
     if (lastMove) {
@@ -87,7 +109,7 @@ export default function Arena() {
           color: getModel(lastMove.modelId).accent + "99",
         });
     }
-    if (match.live) {
+    if (match.live && !reviewing) {
       const accent = getModel(match.live.modelId).accent;
       for (const san of match.live.candidates) {
         const sq = sanToSquares(match.fen, san);
@@ -100,30 +122,27 @@ export default function Arena() {
       }
     }
     return out;
-  }, [lastMove, match.live, match.fen]);
+  }, [lastMove, match.live, match.fen, reviewing]);
 
-  const movesW = useMemo(
-    () => match.moves.filter((m) => m.color === "w"),
-    [match.moves],
-  );
-  const movesB = useMemo(
-    () => match.moves.filter((m) => m.color === "b"),
-    [match.moves],
-  );
-  const costW = pricing ? costOf(movesW, pricing) : null;
-  const costB = pricing ? costOf(movesB, pricing) : null;
+  // Panels read the reviewed slice, not the whole game: a scorecard showing the
+  // final accuracy beside the analysis from move 14 invites exactly the wrong
+  // reading. The header meters stay on the whole match, because that is what
+  // has actually been spent.
+  const costW = pricing ? costOf(view.through.filter((m) => m.color === "w"), pricing) : null;
+  const costB = pricing ? costOf(view.through.filter((m) => m.color === "b"), pricing) : null;
   const totalTokens = match.moves.reduce(
     (a, m) => a + (m.usage.totalTokens ?? 0),
     0,
   );
+  const totalCost = pricing ? costOf(match.moves, pricing) : null;
 
   const scoreW = useMemo(
-    () => scorecardFor(match.moves, "w", match.players.w),
-    [match.moves, match.players.w],
+    () => scorecardFor(view.through, "w", match.players.w),
+    [view.through, match.players.w],
   );
   const scoreB = useMemo(
-    () => scorecardFor(match.moves, "b", match.players.b),
-    [match.moves, match.players.b],
+    () => scorecardFor(view.through, "b", match.players.b),
+    [view.through, match.players.b],
   );
 
   return (
@@ -191,8 +210,8 @@ export default function Arena() {
               title="Estimated spend this match, from live AI Gateway rates"
             >
               <span>{formatTokens(totalTokens)} tok</span>
-              {costW !== null && costB !== null && (
-                <span className="text-arena-dim">~{formatUsd(costW + costB)}</span>
+              {totalCost !== null && (
+                <span className="text-arena-dim">~{formatUsd(totalCost)}</span>
               )}
             </span>
           )}
@@ -218,8 +237,16 @@ export default function Arena() {
         onStart={match.start}
         onPause={match.pause}
         onStep={match.step}
-        onReset={() => match.reset(true)}
-        onDemo={match.startDemo}
+        // A selection left over from the last game would point at a ply
+        // number the new one also has, quietly rewinding to a different match.
+        onReset={() => {
+          setSelectedPly(null);
+          match.reset(true);
+        }}
+        onDemo={() => {
+          setSelectedPly(null);
+          match.startDemo();
+        }}
         promptVersion={match.promptVersion}
         setPromptVersion={match.setPromptVersion}
       />
@@ -231,9 +258,9 @@ export default function Arena() {
           spec={white}
           locked={locked}
           onChangeModel={(id) => match.setPlayers((p) => ({ ...p, w: id }))}
-          isActive={turn === "w" && match.status === "thinking"}
-          live={match.live?.color === "w" ? match.live : null}
-          lastMove={lastByColor("w")}
+          isActive={!reviewing && turn === "w" && match.status === "thinking"}
+          live={!reviewing && match.live?.color === "w" ? match.live : null}
+          lastMove={lastByColor(view.through, "w")}
           score={scoreW}
           cost={costW}
         />
@@ -242,17 +269,28 @@ export default function Arena() {
           className="flex min-h-0 flex-col items-center gap-3"
           style={{ "--board": BOARD, "--column": COLUMN } as React.CSSProperties}
         >
-          <div className="flex w-[var(--column)] items-center justify-center">
-            <EvalSummary cp={currentEval} active={engineOn} />
+          <div className="flex w-[var(--column)] items-center justify-center gap-2.5">
+            <EvalSummary cp={view.cp} active={engineOn} />
+            {reviewing && lastMove && (
+              <Badge title="The board is showing a past position. ← → to step, Esc to catch up.">
+                <span className="h-1.5 w-1.5 rounded-full bg-arena-info" />
+                Reviewing {lastMove.moveNumber}
+                {lastMove.color === "w" ? "." : "…"} {lastMove.san}
+              </Badge>
+            )}
           </div>
           <div className="flex h-[var(--board)] shrink-0 items-stretch gap-3">
-            <EvalBar cp={currentEval} active={engineOn} />
+            <EvalBar cp={view.cp} active={engineOn} />
             <div className="w-[var(--board)]">
-              <Board fen={match.fen} arrows={arrows} />
+              <Board fen={view.fen} arrows={arrows} />
             </div>
           </div>
           <div className="min-h-0 w-[var(--column)] flex-1">
-            <MoveList moves={match.moves} />
+            <MoveList
+              moves={match.moves}
+              selectedPly={selectedPly}
+              onSelect={setSelectedPly}
+            />
           </div>
         </div>
 
@@ -261,9 +299,9 @@ export default function Arena() {
           spec={black}
           locked={locked}
           onChangeModel={(id) => match.setPlayers((p) => ({ ...p, b: id }))}
-          isActive={turn === "b" && match.status === "thinking"}
-          live={match.live?.color === "b" ? match.live : null}
-          lastMove={lastByColor("b")}
+          isActive={!reviewing && turn === "b" && match.status === "thinking"}
+          live={!reviewing && match.live?.color === "b" ? match.live : null}
+          lastMove={lastByColor(view.through, "b")}
           score={scoreB}
           cost={costB}
         />

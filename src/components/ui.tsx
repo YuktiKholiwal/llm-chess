@@ -1,4 +1,21 @@
 import type { ReactNode } from "react";
+import type { MoveQuality } from "@/lib/types";
+
+/* ---------------------------------------------------------------- palette */
+
+/**
+ * Move-quality colours. Shared because the move list, its legend and the
+ * inspector must agree on them -- a blunder that is red in one place and
+ * orange in another reads as two different verdicts.
+ */
+export const QUALITY_COLOR: Record<MoveQuality, string> = {
+  best: "#62c073",
+  good: "#7d7d7d",
+  inaccuracy: "#f5a623",
+  mistake: "#f79448",
+  blunder: "#ff6369",
+  forced: "#545454",
+};
 
 /* ------------------------------------------------------------------ icons */
 

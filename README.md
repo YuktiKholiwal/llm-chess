@@ -118,7 +118,12 @@ Stockfish evaluates the position before and after each move. The difference — 
 
 Moves with only one legal option are tagged `forced` and excluded — you can't be blamed for the only move on the board.
 
-Hover any move in the list to see `mistake · −208cp · best: e5`.
+Click any move to replay it. The board rewinds to that position, both panels
+restore what each model said at the time, and the inspector shows what Stockfish
+made of it — `Inaccuracy · −62cp · 78.3% · engine played Nc6`. Arrow keys step
+through the game, `Esc` returns to live. It works mid-match without disturbing
+the one in progress, which is how you catch the moment a model predicted the
+attack and still missed the defence.
 
 For scale: strong club players average 30–50 ACPL, grandmasters under 20.
 
