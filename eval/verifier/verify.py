@@ -35,7 +35,13 @@ VERIFIABLE_TYPES = ("state", "threat")
 def verify_claim(board: chess.Board, claim: dict, engine: Engine) -> bool | None:
     if claim["type"] not in VERIFIABLE_TYPES:
         return None
-    return verdict_for(board, claim.get("structured"), engine)
+    return verdict_for(
+        board,
+        claim.get("structured"),
+        engine,
+        claim_type=claim["type"],
+        text=claim.get("text"),
+    )
 
 
 def run(cfg: Config, args: argparse.Namespace) -> None:

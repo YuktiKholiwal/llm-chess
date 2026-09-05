@@ -1,0 +1,13 @@
+{
+  "stage": "extract",
+  "finished_at": "2026-09-05T20:41:14+00:00",
+  "commit": "951c85e-dirty",
+  "extractor": "anthropic/claude-haiku-4.5",
+  "prompt": {
+    "version": "v1",
+    "hash": "e540bb447c5e"
+  },
+  "traces": 600,
+  "claims": 4916,
+  "cost_usd": 2.1496
+}

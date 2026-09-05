@@ -13,6 +13,8 @@ answers.
 
 from __future__ import annotations
 
+import re
+
 import chess
 
 from ..extractor.schema import is_negated, is_well_formed
@@ -39,6 +41,37 @@ PIECE_NAMES = {
 # would score ordinary language as false. Half a pawn is wide enough to accept
 # that and narrow enough to still reject "I am a rook up" when level.
 MATERIAL_TOLERANCE = 0.5
+
+UCI_TOKEN = re.compile(r"\b([a-h][1-8][a-h][1-8][qrbn]?)\b", re.IGNORECASE)
+SAN_TOKEN = re.compile(
+    r"(?:O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?"
+    r"|[a-h](?:x[a-h])?[1-8](?:=[QRBN])?[+#]?)"
+)
+
+
+def move_from_text(board: chess.Board, text: str) -> chess.Move | None:
+    """The first legal move named in the text, read as UCI then as SAN.
+
+    First rather than best: a plan's opening clause is its first move, and
+    picking the strongest mention would quietly upgrade a vague plan.
+    """
+    if not text:
+        return None
+
+    for match in UCI_TOKEN.finditer(text):
+        try:
+            move = chess.Move.from_uci(match.group(1).lower())
+        except ValueError:
+            continue
+        if move in board.legal_moves:
+            return move
+
+    for match in SAN_TOKEN.finditer(text):
+        try:
+            return board.parse_san(match.group(0))
+        except (ValueError, chess.IllegalMoveError, chess.AmbiguousMoveError):
+            continue
+    return None
 
 
 def parse_square(value) -> int | None:
@@ -212,6 +245,31 @@ def mate_in(board: chess.Board, count, by=None, engine=None) -> bool | None:
     return False if distance is None else distance == int(wanted)
 
 
+def check_available(board: chess.Board, by=None, text: str | None = None) -> bool | None:
+    """The threat reading of a check claim: a check is available, not given.
+
+    "Rc6+ delivers check" and "the king is in check" are different assertions,
+    and running the second handler over the first would mark almost every
+    checking move a model correctly spotted as false. Where the claim names its
+    move, that move is the claim and is tested directly; otherwise the question
+    is whether the side has any checking move at all.
+
+    A claim that the side NOT to move can check is about a position two plies
+    away and is reported unverifiable rather than guessed at.
+    """
+    if text:
+        move = move_from_text(board, text)
+        if move is not None:
+            return board.gives_check(move)
+
+    side = parse_color(by)
+    if side is None:
+        side = board.turn
+    if side != board.turn:
+        return None
+    return any(board.gives_check(move) for move in board.legal_moves)
+
+
 def square_controlled(board: chess.Board, square: str, by) -> bool | None:
     target = parse_square(square)
     side = parse_color(by)
@@ -304,7 +362,13 @@ DISPATCH = {
 }
 
 
-def verdict_for(board: chess.Board, structured, engine=None) -> bool | None:
+def verdict_for(
+    board: chess.Board,
+    structured,
+    engine=None,
+    claim_type: str = "state",
+    text: str | None = None,
+) -> bool | None:
     """The verdict on one structured claim, with negation applied last.
 
     A negated claim is the same question with the answer flipped, so "the
@@ -315,7 +379,12 @@ def verdict_for(board: chess.Board, structured, engine=None) -> bool | None:
     if not is_well_formed(structured):
         return None
 
-    answer = DISPATCH[structured["kind"]](board, structured, engine)
+    kind = structured["kind"]
+    # A check asserted as a threat is about a move, not about the position now.
+    if kind == "check" and claim_type == "threat":
+        answer = check_available(board, structured.get("by"), text)
+    else:
+        answer = DISPATCH[kind](board, structured, engine)
     if answer is None:
         return None
     return (not answer) if is_negated(structured) else answer

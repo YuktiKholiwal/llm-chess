@@ -256,3 +256,53 @@ class TestMateIn:
     def test_reports_no_mate_where_there_is_none(self, engine):
         quiet = "4k3/8/8/8/8/8/8/4K3 w - - 0 1"
         assert h.mate_in(board(quiet), 2, by="white", engine=engine) is False
+
+
+class TestCheckAsThreat:
+    """"Qd8 delivers check" and "the king is in check" are different claims.
+
+    Models describe checking moves constantly, and running the present-tense
+    handler over those sentences would mark almost every correctly-spotted
+    check as false -- penalising exactly the models that explain themselves in
+    the most concrete terms.
+    """
+
+    # White to move; Qd1-d8 is mate, so it certainly gives check. Nobody is in
+    # check right now.
+    POSITION = "7k/6pp/8/8/8/8/r4PPP/3Q2K1 w - - 1 2"
+    CHECK = {"kind": "check", "by": "white"}
+
+    def test_the_present_tense_reading_is_unchanged(self):
+        assert h.verdict_for(
+            board(self.POSITION), self.CHECK, claim_type="state",
+            text="the king is in check",
+        ) is False
+
+    def test_a_named_move_that_checks_is_true(self):
+        assert h.verdict_for(
+            board(self.POSITION), self.CHECK, claim_type="threat",
+            text="Qd8 delivers check",
+        ) is True
+
+    def test_a_named_move_that_does_not_check_is_false(self):
+        assert h.verdict_for(
+            board(self.POSITION), self.CHECK, claim_type="threat",
+            text="Qd7 delivers check",
+        ) is False
+
+    def test_reads_the_move_in_uci_too(self):
+        assert h.verdict_for(
+            board(self.POSITION), self.CHECK, claim_type="threat",
+            text="d1d8 gives check",
+        ) is True
+
+    def test_falls_back_to_whether_any_check_exists(self):
+        assert h.check_available(board(self.POSITION), by="white") is True
+
+    def test_reports_no_check_available_where_there_is_none(self):
+        quiet = "4k3/8/8/8/8/8/8/4K3 w - - 0 1"
+        assert h.check_available(board(quiet), by="white") is False
+
+    def test_the_side_not_to_move_cannot_be_answered(self):
+        # That claim is about a position two plies away.
+        assert h.check_available(board(self.POSITION), by="black") is None
