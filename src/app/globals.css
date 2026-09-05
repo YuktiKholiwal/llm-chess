@@ -1,30 +1,63 @@
 @import "tailwindcss";
 
+/*
+ * Geist-flavoured neutral scale. One background, one panel, two line weights,
+ * three text weights — anything that needs more separation than that is a
+ * layout problem, not a colour problem.
+ */
 @theme {
-  --color-arena-bg: #08080a;
-  --color-arena-panel: #101013;
-  --color-arena-panel-2: #16161b;
-  --color-arena-border: #24242c;
-  --color-arena-text: #e8e8ec;
-  --color-arena-dim: #8b8b98;
-  --color-arena-faint: #55555f;
-  --font-mono-arena: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --color-arena-bg: #0a0a0a;
+  --color-arena-panel: #111111;
+  --color-arena-panel-2: #1a1a1a;
+  --color-arena-line: #1f1f1f;
+  --color-arena-border: #2a2a2a;
+  --color-arena-edge: #3d3d3d;
+  --color-arena-text: #ededed;
+  --color-arena-dim: #a1a1a1;
+  --color-arena-faint: #7d7d7d;
+
+  --color-arena-good: #62c073;
+  --color-arena-warn: #f5a623;
+  --color-arena-bad: #ff6369;
+  --color-arena-info: #52a8ff;
+
+  --font-sans-arena: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono-arena: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 html,
 body {
   background: var(--color-arena-bg);
   color: var(--color-arena-text);
+  font-family: var(--font-sans-arena);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #ededed;
+  color: #0a0a0a;
+}
+
+/* One focus treatment everywhere, so keyboard users get a consistent target. */
+:focus-visible {
+  outline: 2px solid var(--color-arena-info);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Thin scrollbars so the streaming panels don't look chunky */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-arena-border) transparent;
+}
 .scroll-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: #2c2c36;
+  background: var(--color-arena-border);
   border-radius: 3px;
 }
 .scroll-thin::-webkit-scrollbar-track {
@@ -32,8 +65,13 @@ body {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.15; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
 }
 .cursor-blink::after {
   content: "▍";
@@ -42,10 +80,29 @@ body {
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 currentColor; opacity: 0.5; }
-  70% { box-shadow: 0 0 0 6px transparent; opacity: 0; }
-  100% { box-shadow: 0 0 0 0 transparent; opacity: 0; }
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0.5;
+  }
+  70% {
+    box-shadow: 0 0 0 5px transparent;
+    opacity: 0;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 0;
+  }
 }
 .thinking-dot {
   animation: pulse-ring 1.6s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

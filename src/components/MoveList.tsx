@@ -4,12 +4,12 @@ import { useEffect, useRef } from "react";
 import type { MoveQuality, MoveRecord } from "@/lib/types";
 
 const QUALITY_COLOR: Record<MoveQuality, string> = {
-  best: "#4ade80",
-  good: "#94a3b8",
-  inaccuracy: "#fbbf24",
-  mistake: "#fb923c",
-  blunder: "#f87171",
-  forced: "#64748b",
+  best: "#62c073",
+  good: "#7d7d7d",
+  inaccuracy: "#f5a623",
+  mistake: "#f79448",
+  blunder: "#ff6369",
+  forced: "#545454",
 };
 
 function Cell({ move }: { move: MoveRecord | undefined }) {
@@ -18,9 +18,9 @@ function Cell({ move }: { move: MoveRecord | undefined }) {
     return (
       <span
         title="Opening book seed — not chosen by a model, not scored"
-        className="flex flex-1 items-center gap-1.5 rounded px-1 py-0.5 font-[family-name:var(--font-mono-arena)] text-[12px] text-arena-faint italic"
+        className="flex flex-1 items-center gap-2 rounded px-1.5 py-1 font-mono-arena text-[12px] text-arena-faint"
       >
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full border border-arena-faint" />
+        <span className="h-[5px] w-[5px] shrink-0 rounded-full border border-arena-edge" />
         {move.san}
       </span>
     );
@@ -40,49 +40,44 @@ function Cell({ move }: { move: MoveRecord | undefined }) {
   return (
     <span
       title={title}
-      className="flex flex-1 items-center gap-1.5 rounded px-1 py-0.5 font-[family-name:var(--font-mono-arena)] text-[12px] hover:bg-white/5"
+      className="flex flex-1 items-center gap-2 rounded px-1.5 py-1 font-mono-arena text-[12px] transition-colors hover:bg-white/[0.04]"
     >
       <span
-        className="h-1.5 w-1.5 shrink-0 rounded-full"
+        className="h-[5px] w-[5px] shrink-0 rounded-full"
         style={{ background: color ?? "#33333c" }}
       />
-      <span className={move.forced ? "text-red-400" : "text-arena-text"}>
-        {move.san}
-      </span>
+      <span className={move.forced ? "text-arena-bad" : "text-arena-text"}>{move.san}</span>
       {move.illegalAttempts.length > 0 && (
-        <span className="text-[10px] text-amber-500">
-          ⚠{move.illegalAttempts.length}
-        </span>
+        <span className="text-[10px] text-arena-warn">⚠{move.illegalAttempts.length}</span>
       )}
     </span>
   );
 }
 
 const LEGEND: { q: MoveQuality; label: string }[] = [
-  { q: "best", label: "best" },
-  { q: "good", label: "good" },
-  { q: "inaccuracy", label: "inaccuracy" },
-  { q: "mistake", label: "mistake" },
-  { q: "blunder", label: "blunder" },
+  { q: "best", label: "Best" },
+  { q: "good", label: "Good" },
+  { q: "inaccuracy", label: "Inaccuracy" },
+  { q: "mistake", label: "Mistake" },
+  { q: "blunder", label: "Blunder" },
 ];
 
 /** The coloured dots mean nothing without this. */
 export function MoveLegend() {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[10px] text-arena-faint">
-      <span className="uppercase tracking-[0.08em]">Move quality</span>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[10.5px] text-arena-faint">
       {LEGEND.map(({ q, label }) => (
-        <span key={q} className="flex items-center gap-1">
+        <span key={q} className="flex items-center gap-1.5">
           <span
-            className="h-1.5 w-1.5 rounded-full"
+            className="h-[5px] w-[5px] rounded-full"
             style={{ background: QUALITY_COLOR[q] }}
           />
           {label}
         </span>
       ))}
-      <span className="flex items-center gap-1">
-        <span className="h-1.5 w-1.5 rounded-full border border-arena-faint" />
-        opening book
+      <span className="flex items-center gap-1.5">
+        <span className="h-[5px] w-[5px] rounded-full border border-arena-edge" />
+        Opening book
       </span>
     </div>
   );
@@ -100,18 +95,17 @@ export function MoveList({ moves }: { moves: MoveRecord[] }) {
   return (
     <div
       ref={ref}
-      className="scroll-thin h-full min-h-0 overflow-y-auto rounded-lg border border-arena-border bg-arena-panel p-2"
+      className="scroll-thin h-full min-h-0 overflow-y-auto rounded-xl border border-arena-border bg-arena-panel p-2"
     >
       {rows.length === 0 && (
-        <p className="p-2 text-[12px] italic text-arena-faint">
-          Moves will appear here, colour-coded by how good Stockfish thinks they
-          are.
+        <p className="px-1.5 py-2 text-[12px] text-arena-faint">
+          Moves appear here, colour-coded by how good Stockfish thinks they are.
         </p>
       )}
       {rows.map((row, i) => (
         <div key={i} className="flex items-center gap-1">
-          <span className="w-6 shrink-0 text-right font-[family-name:var(--font-mono-arena)] text-[11px] text-arena-faint">
-            {i + 1}.
+          <span className="w-6 shrink-0 text-right font-mono-arena text-[11px] tabular-nums text-arena-faint">
+            {i + 1}
           </span>
           <Cell move={row[0]} />
           <Cell move={row[1]} />

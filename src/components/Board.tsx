@@ -3,13 +3,7 @@
 import { Chessboard } from "react-chessboard";
 import type { Arrow } from "react-chessboard";
 
-export function Board({
-  fen,
-  arrows,
-}: {
-  fen: string;
-  arrows: Arrow[];
-}) {
+export function Board({ fen, arrows }: { fen: string; arrows: Arrow[] }) {
   return (
     <div className="w-full">
       <Chessboard
@@ -20,14 +14,14 @@ export function Board({
           animationDurationInMs: 220,
           arrows,
           boardStyle: {
-            borderRadius: "6px",
+            borderRadius: "8px",
             overflow: "hidden",
-            boxShadow: "0 12px 48px rgba(0,0,0,0.55)",
+            boxShadow: "0 16px 56px rgba(0,0,0,0.6)",
           },
-          darkSquareStyle: { backgroundColor: "#4a5568" },
-          lightSquareStyle: { backgroundColor: "#cbd2dc" },
-          darkSquareNotationStyle: { color: "#cbd2dc" },
-          lightSquareNotationStyle: { color: "#4a5568" },
+          darkSquareStyle: { backgroundColor: "#585858" },
+          lightSquareStyle: { backgroundColor: "#d9d9d9" },
+          darkSquareNotationStyle: { color: "#d9d9d9" },
+          lightSquareNotationStyle: { color: "#585858" },
         }}
       />
     </div>

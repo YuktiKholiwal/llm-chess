@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RichText } from "@/components/RichText";
+import { ChevronDownIcon, ChevronIcon } from "@/components/ui";
 import { formatUsd } from "@/lib/cost";
 import { MODEL_GROUPS, type ModelSpec } from "@/lib/models";
 import type { Color, LiveThought, MoveRecord, Scorecard } from "@/lib/types";
@@ -9,7 +10,8 @@ import type { Color, LiveThought, MoveRecord, Scorecard } from "@/lib/types";
 const STAT_HELP: Record<string, string> = {
   Blunders: "Moves that threw away a winning or level position.",
   Illegal: "Times this model proposed a move that isn't legal and had to retry.",
-  "Eval err": "How far the model's own read of the position was from Stockfish's, in pawns. Lower means it understands who is winning.",
+  "Eval err":
+    "How far the model's own read of the position was from Stockfish's, in pawns. Lower means it understands who is winning.",
   Cost: "Estimated spend for this side, at live AI Gateway rates.",
 };
 
@@ -23,16 +25,16 @@ function Stat({
   tone?: "bad" | "warn";
 }) {
   return (
-    <div className="flex flex-col gap-0.5" title={STAT_HELP[label]}>
-      <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-arena-faint">
+    <div className="flex flex-col gap-1" title={STAT_HELP[label]}>
+      <span className="text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
         {label}
       </span>
       <span
-        className={`font-[family-name:var(--font-mono-arena)] text-[13px] tabular-nums ${
+        className={`font-mono-arena text-[13px] tabular-nums ${
           tone === "bad" && value !== 0
-            ? "text-red-400"
+            ? "text-arena-bad"
             : tone === "warn" && value !== 0
-              ? "text-amber-400"
+              ? "text-arena-warn"
               : "text-arena-text"
         }`}
       >
@@ -81,14 +83,14 @@ export function PlayerPanel({
     <div
       className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border bg-arena-panel transition-colors duration-300"
       style={{
-        borderColor: isActive ? spec.accent : "var(--color-arena-border)",
-        boxShadow: isActive ? `0 0 32px -16px ${spec.accent}` : undefined,
+        borderColor: isActive ? `${spec.accent}88` : "var(--color-arena-border)",
+        boxShadow: isActive ? `0 0 40px -22px ${spec.accent}` : undefined,
       }}
     >
-      {/* Header: side badge + model picker */}
-      <div className="flex items-center gap-2.5 border-b border-arena-border px-3 py-2.5">
+      {/* Header: side + model picker */}
+      <div className="flex items-center gap-2.5 border-b border-arena-line px-3 py-2.5">
         <span
-          className={`h-2 w-2 shrink-0 rounded-full ${isActive ? "thinking-dot" : ""}`}
+          className={`h-[7px] w-[7px] shrink-0 rounded-full ${isActive ? "thinking-dot" : ""}`}
           style={{ background: spec.accent, color: spec.accent }}
         />
         <div className="relative min-w-0 flex-1">
@@ -101,7 +103,7 @@ export function PlayerPanel({
                 ? "Locked once a model has moved — start a new game to change"
                 : "Choose this side's model"
             }
-            className="w-full cursor-pointer appearance-none truncate rounded-md border border-transparent bg-arena-panel-2 py-1.5 pl-2.5 pr-7 text-[13px] font-medium text-arena-text outline-none transition-colors hover:border-arena-border focus:border-arena-dim disabled:cursor-not-allowed disabled:bg-transparent disabled:text-arena-dim"
+            className="w-full cursor-pointer appearance-none truncate rounded-md border border-transparent bg-transparent py-1 pl-1.5 pr-7 text-[13.5px] font-medium tracking-[-0.01em] text-arena-text outline-none transition-colors hover:border-arena-border hover:bg-arena-panel-2 focus:border-arena-border disabled:cursor-not-allowed disabled:border-transparent disabled:bg-transparent disabled:text-arena-dim"
           >
             {MODEL_GROUPS.map((g) => (
               <optgroup key={g.label} label={g.label}>
@@ -114,40 +116,38 @@ export function PlayerPanel({
             ))}
           </select>
           {!locked && (
-            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-arena-dim">
-              ▼
+            <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-arena-faint">
+              <ChevronDownIcon />
             </span>
           )}
         </div>
-        <span className="shrink-0 rounded border border-arena-border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.08em] text-arena-dim">
+        <span className="shrink-0 text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
           {color === "w" ? "White" : "Black"}
         </span>
       </div>
 
       {/* Status */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 text-[11px]">
+      <div className="flex items-center justify-between gap-2 px-3 pb-1.5 pt-2.5 text-[11.5px]">
         <span className="truncate text-arena-dim">
           {streaming ? (
             <span style={{ color: spec.accent }}>
-              thinking
+              Thinking
               {live.attempt > 0 && (
-                <span className="ml-1 text-amber-400">· retry {live.attempt}</span>
+                <span className="ml-1 text-arena-warn">· retry {live.attempt}</span>
               )}
             </span>
           ) : lastMove ? (
             <>
-              played{" "}
-              <span className="font-[family-name:var(--font-mono-arena)] text-arena-text">
-                {lastMove.san}
-              </span>
-              {lastMove.forced && <span className="ml-1 text-red-400">· forced</span>}
+              <span className="text-arena-faint">Played </span>
+              <span className="font-mono-arena text-arena-text">{lastMove.san}</span>
+              {lastMove.forced && <span className="ml-1 text-arena-bad">· forced</span>}
             </>
           ) : (
-            "waiting"
+            <span className="text-arena-faint">Waiting</span>
           )}
         </span>
         {lastMove && !streaming && (
-          <span className="shrink-0 font-[family-name:var(--font-mono-arena)] tabular-nums text-arena-faint">
+          <span className="shrink-0 font-mono-arena tabular-nums text-arena-faint">
             {(lastMove.thinkMs / 1000).toFixed(1)}s
           </span>
         )}
@@ -155,12 +155,12 @@ export function PlayerPanel({
 
       {/* Candidate moves pulled live out of the stream */}
       {candidates.length > 0 && (
-        <div className="flex flex-wrap gap-1 px-3 pb-2">
+        <div className="flex flex-wrap gap-1 px-3 pb-1.5 pt-1">
           {candidates.map((c) => (
             <span
               key={c}
-              className="rounded border px-1.5 py-0.5 font-[family-name:var(--font-mono-arena)] text-[11px]"
-              style={{ borderColor: `${spec.accent}55`, color: spec.accent }}
+              className="rounded border px-1.5 py-0.5 font-mono-arena text-[11px]"
+              style={{ borderColor: `${spec.accent}44`, color: spec.accent }}
             >
               {c}
             </span>
@@ -169,30 +169,35 @@ export function PlayerPanel({
       )}
 
       {/* Analysis */}
-      <div ref={scrollRef} className="scroll-thin min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+      <div ref={scrollRef} className="scroll-thin min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-1.5">
         {analysis ? (
           <div
-            className={`text-[13px] leading-[1.6] text-arena-text/85 ${streaming ? "cursor-blink" : ""}`}
+            className={`text-[13px] leading-[1.65] text-arena-text/90 ${streaming ? "cursor-blink" : ""}`}
           >
             <RichText text={analysis} />
           </div>
         ) : (
-          <p className="text-[12px] italic text-arena-faint">
+          <p className="text-[12.5px] text-arena-faint">
             {streaming ? "…" : "Waiting for this side to move."}
           </p>
         )}
 
         {reasoning && (
-          <div className="mt-3 border-t border-arena-border/60 pt-2.5">
+          <div className="mt-4 border-t border-arena-line pt-3">
             <button
+              type="button"
               onClick={() => setShowReasoning((s) => !s)}
-              className="text-[11px] text-arena-dim transition-colors hover:text-arena-text"
+              className="flex items-center gap-1.5 text-[11.5px] text-arena-faint transition-colors hover:text-arena-text"
             >
-              {showReasoning ? "▾" : "▸"} raw thinking ·{" "}
-              {reasoning.length.toLocaleString()} chars
+              <ChevronIcon open={showReasoning} />
+              Raw thinking
+              <span className="font-mono-arena tabular-nums">
+                {reasoning.length.toLocaleString()}
+              </span>
+              chars
             </button>
             {showReasoning && (
-              <div className="mt-2 whitespace-pre-wrap rounded-md border border-arena-border bg-arena-bg/60 p-2.5 font-[family-name:var(--font-mono-arena)] text-[11px] leading-relaxed text-arena-dim">
+              <div className="mt-2 whitespace-pre-wrap rounded-lg border border-arena-line bg-arena-bg p-3 font-mono-arena text-[11px] leading-[1.6] text-arena-dim">
                 {reasoning}
               </div>
             )}
@@ -202,30 +207,31 @@ export function PlayerPanel({
 
       {/* Scorecard. Accuracy leads because it is the one number a non-player
           can read; ACPL lives in its tooltip for people who want it. */}
-      <div className="border-t border-arena-border bg-arena-bg/40 px-3 py-2.5">
+      <div className="border-t border-arena-line px-3 py-3">
         <div
-          className="mb-2 flex items-baseline gap-2"
+          className="mb-3 flex items-baseline gap-2"
           title={
             score.moves
               ? `Average centipawn loss: ${score.acpl}. How close this model's moves were to Stockfish's best.`
               : "No moves scored yet"
           }
         >
-          <span className="font-[family-name:var(--font-mono-arena)] text-[22px] font-semibold leading-none tabular-nums text-arena-text">
-            {score.moves && score.accuracy ? `${score.accuracy.toFixed(1)}%` : "—"}
+          <span className="font-mono-arena text-[24px] font-medium leading-none tracking-[-0.02em] tabular-nums text-arena-text">
+            {score.moves && score.accuracy ? score.accuracy.toFixed(1) : "—"}
+            {score.moves && score.accuracy ? (
+              <span className="text-[15px] text-arena-faint">%</span>
+            ) : null}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
+          <span className="text-[9.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
             accuracy
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-4 gap-2">
           <Stat label="Blunders" value={score.blunders} tone="bad" />
           <Stat label="Illegal" value={score.illegalAttempts} tone="warn" />
           <Stat
             label="Eval err"
-            value={
-              score.evalCompliance > 0 ? `${score.evalErrorPawns.toFixed(1)}p` : "—"
-            }
+            value={score.evalCompliance > 0 ? `${score.evalErrorPawns.toFixed(1)}p` : "—"}
           />
           <Stat label="Cost" value={cost === null ? "—" : formatUsd(cost)} />
         </div>

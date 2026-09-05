@@ -8,6 +8,7 @@ import { Controls } from "@/components/Controls";
 import { EvalBar, EvalSummary } from "@/components/EvalBar";
 import { MoveList, MoveLegend } from "@/components/MoveList";
 import { PlayerPanel } from "@/components/PlayerPanel";
+import { ArrowRightIcon, Badge } from "@/components/ui";
 import { useEngine } from "@/hooks/useEngine";
 import { useMatch } from "@/hooks/useMatch";
 import { sanToSquares, scorecardFor } from "@/lib/chess-utils";
@@ -119,85 +120,84 @@ export default function Arena() {
   );
 
   return (
-    <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-3 p-3">
-      {/* Header */}
-      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-arena-border pb-3">
-        <div className="flex items-baseline gap-2.5">
-          <h1 className="text-[15px] font-semibold tracking-tight">
-            LLM Chess Arena
-          </h1>
-          <p className="hidden text-[11px] text-arena-dim sm:block">
+    <main className="mx-auto flex h-screen max-w-[1600px] flex-col gap-4 p-4">
+      {/* Header. Match settings live in Controls — repeating them here just
+          added chrome without adding a place to change them. */}
+      <header className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-arena-border pb-3">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-[15px] font-semibold tracking-[-0.01em]">LLM Chess Arena</h1>
+          <p className="hidden text-[11.5px] text-arena-faint md:block">
             Two AI models play. Stockfish scores every move.
           </p>
         </div>
-        <span className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim">
+
+        <Badge title="Opening seeded from the book so no two matches start alike">
           {match.opening}
-        </span>
-        <span
-          className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim"
-          title={
-            match.mode === "assisted"
-              ? "Models are given the list of legal moves"
-              : "Models get only the position and must work out legality themselves"
-          }
-        >
-          legal moves {match.mode === "assisted" ? "shown" : "hidden"}
-        </span>
-        <span
-          className="rounded border border-arena-border px-2 py-0.5 text-[11px] text-arena-dim"
-          title="Which frozen prompt variant produced these numbers"
-        >
-          prompt: {match.promptVersion}
-        </span>
+        </Badge>
+
         {match.isDemoMatch && (
-          <span
-            className="rounded px-2 py-0.5 text-[11px] font-semibold text-arena-bg"
-            style={{ background: "#C4B5FD" }}
-            title="Scripted replay of a real game — no API calls, no model output"
-          >
-            DEMO · scripted
-          </span>
+          <Badge title="Scripted replay of a real game — no API calls, no model output">
+            <span className="h-1.5 w-1.5 rounded-full bg-arena-info" />
+            Demo · scripted
+          </Badge>
         )}
+
         {engineOn && (
-          <span className="text-[11px] text-arena-faint">
-            {engine.grading ? "grading…" : engine.ready ? "engine ready" : "engine off"}
+          <span
+            className="flex items-center gap-1.5 text-[11.5px] text-arena-faint"
+            title="Local Stockfish, running in your browser"
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                engine.grading
+                  ? "bg-arena-warn thinking-dot"
+                  : engine.ready
+                    ? "bg-arena-good"
+                    : "bg-arena-edge"
+              }`}
+              style={engine.grading ? { color: "var(--color-arena-warn)" } : undefined}
+            />
+            {engine.grading ? "Grading" : engine.ready ? "Engine ready" : "Engine loading"}
           </span>
         )}
-        <div className="ml-auto flex items-center gap-3 text-[11px]">
+
+        <div className="ml-auto flex items-center gap-3 text-[11.5px]">
           {match.error && (
-            <span className="max-w-[360px] truncate text-amber-400" title={match.error}>
+            <span
+              className="max-w-[320px] truncate text-arena-warn"
+              title={match.error}
+            >
               {match.error}
             </span>
           )}
           {totalTokens > 0 && (
             <span
-              className="flex items-center gap-2 rounded-md border border-arena-border px-2 py-1 font-[family-name:var(--font-mono-arena)] tabular-nums text-arena-dim"
+              className="flex items-center gap-2 font-mono-arena tabular-nums text-arena-faint"
               title="Estimated spend this match, from live AI Gateway rates"
             >
               <span>{formatTokens(totalTokens)} tok</span>
               {costW !== null && costB !== null && (
-                <span className="text-arena-text">
-                  ~{formatUsd(costW + costB)}
-                </span>
+                <span className="text-arena-dim">~{formatUsd(costW + costB)}</span>
               )}
             </span>
           )}
           {match.outcome && (
-            <span className="rounded-md bg-arena-text px-2.5 py-1 font-[family-name:var(--font-mono-arena)] font-semibold text-arena-bg">
+            <span className="rounded-md bg-arena-text px-2.5 py-1 font-mono-arena text-[11px] font-semibold text-arena-bg">
               {match.outcome.result} · {match.outcome.reason}
             </span>
           )}
           <Link
             href="/leaderboard"
-            className="rounded-md border border-arena-border px-2.5 py-1 text-arena-dim transition-colors hover:border-arena-dim hover:text-arena-text"
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-arena-border px-2.5 font-medium text-arena-dim transition-colors hover:border-arena-edge hover:text-arena-text"
           >
-            Leaderboard →
+            Leaderboard
+            <ArrowRightIcon />
           </Link>
         </div>
       </header>
 
       {/* Three columns */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(260px,1fr)_auto_minmax(260px,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(270px,1fr)_auto_minmax(270px,1fr)]">
         <PlayerPanel
           color="w"
           spec={white}
@@ -210,7 +210,7 @@ export default function Arena() {
           cost={costW}
         />
 
-        <div className="flex min-h-0 flex-col items-center gap-3">
+        <div className="flex min-h-0 flex-col items-center gap-3.5">
           <div className="flex w-full items-center justify-center" style={{ maxWidth: BOARD_PX + 36 }}>
             <EvalSummary cp={currentEval} active={engineOn} />
           </div>
@@ -243,7 +243,7 @@ export default function Arena() {
             />
           </div>
           <div
-            className="flex min-h-0 w-full flex-1 flex-col gap-1.5"
+            className="flex min-h-0 w-full flex-1 flex-col gap-2"
             style={{ maxWidth: BOARD_PX + 36 }}
           >
             <MoveList moves={match.moves} />

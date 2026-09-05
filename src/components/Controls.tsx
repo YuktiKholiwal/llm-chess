@@ -1,40 +1,18 @@
 "use client";
 
+import {
+  Button,
+  DemoIcon,
+  Divider,
+  Label,
+  PauseIcon,
+  PlayIcon,
+  ResetIcon,
+  Segmented,
+  StepIcon,
+} from "@/components/ui";
 import { PROMPT_VERSIONS, type PromptVersion } from "@/lib/prompt";
 import type { MatchStatus, Mode } from "@/lib/types";
-
-function Btn({
-  children,
-  onClick,
-  disabled,
-  primary,
-  title,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  primary?: boolean;
-  title?: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${
-        primary
-          ? "bg-arena-text text-arena-bg hover:bg-white"
-          : "border border-arena-border bg-arena-panel-2 text-arena-text hover:border-arena-dim"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Divider() {
-  return <span className="h-5 w-px shrink-0 bg-arena-border" />;
-}
 
 export function Controls({
   status,
@@ -73,35 +51,51 @@ export function Controls({
   const busy = status === "thinking";
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-arena-border bg-arena-panel p-2.5">
+    <div className="rounded-xl border border-arena-border bg-arena-panel">
       {/* Transport */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
         {running ? (
-          <Btn onClick={onPause} primary title="Stop after the current move">
-            ❙❙ Pause
-          </Btn>
+          <Button
+            onClick={onPause}
+            variant="primary"
+            title="Stop after the current move"
+          >
+            <PauseIcon />
+            Pause
+          </Button>
         ) : (
-          <Btn onClick={onStart} disabled={finished || busy} primary>
-            ▶ {status === "idle" ? "Start match" : "Resume"}
-          </Btn>
+          <Button
+            onClick={onStart}
+            disabled={finished || busy}
+            variant="primary"
+          >
+            <PlayIcon />
+            {status === "idle" ? "Start match" : "Resume"}
+          </Button>
         )}
-        <Btn
+        <Button
           onClick={onStep}
           disabled={running || finished || busy}
           title="Play exactly one move, then stop"
         >
-          ⇥ Step
-        </Btn>
-        <Btn onClick={onReset} title="New game with a fresh opening seed">
-          ↻ New
-        </Btn>
+          <StepIcon />
+          Step
+        </Button>
+        <Button onClick={onReset} title="New game with a fresh opening seed">
+          <ResetIcon />
+          New
+        </Button>
         <Divider />
-        <Btn onClick={onDemo} title="Replay a real master game — no API calls, no cost">
-          ◎ Demo
-        </Btn>
+        <Button
+          onClick={onDemo}
+          title="Replay a real master game — no API calls, no cost"
+        >
+          <DemoIcon />
+          Demo
+        </Button>
 
-        <div className="ml-auto flex items-center gap-2 text-[11px] text-arena-dim">
-          <span>pace</span>
+        <label className="ml-auto flex items-center gap-2.5 text-[11.5px] text-arena-faint">
+          <span>Pace</span>
           <input
             type="range"
             min={0}
@@ -109,75 +103,62 @@ export function Controls({
             step={250}
             value={delayMs}
             onChange={(e) => setDelayMs(Number(e.target.value))}
-            className="w-24 accent-neutral-200"
+            className="h-1 w-24 cursor-pointer accent-arena-text"
             title="Pause between moves"
           />
-          <span className="w-9 text-right font-[family-name:var(--font-mono-arena)] tabular-nums">
+          <span className="w-9 text-right font-mono-arena tabular-nums text-arena-dim">
             {(delayMs / 1000).toFixed(1)}s
           </span>
-        </div>
+        </label>
       </div>
 
-      {/* Match settings */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-arena-border/60 pt-2">
-        <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
-          Legal moves
-        </span>
-        <div className="flex items-center gap-0.5 rounded-md border border-arena-border p-0.5">
-          {(
-            [
-              ["assisted", "Shown", "The model is given the list of legal moves. Tests chess judgment only."],
-              ["blind", "Hidden", "The model gets only the position and must work out legality itself. Much harder."],
-            ] as [Mode, string, string][]
-          ).map(([m, label, tip]) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              title={tip}
-              className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
-                mode === m
-                  ? "bg-arena-text text-arena-bg"
-                  : "text-arena-dim hover:text-arena-text"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      {/* Match settings. Each label+control is one wrap unit, so a narrow
+          column breaks between groups instead of orphaning a separator. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-arena-line px-3 py-2.5">
+        <div className="flex items-center gap-2">
+          <Label>Legal moves</Label>
+          <Segmented
+            value={mode}
+            onChange={setMode}
+            options={[
+              {
+                value: "assisted",
+                label: "Shown",
+                title:
+                  "The model is given the list of legal moves. Tests chess judgment only.",
+              },
+              {
+                value: "blind",
+                label: "Hidden",
+                title:
+                  "The model gets only the position and must work out legality itself. Much harder.",
+              },
+            ]}
+          />
         </div>
 
-        <Divider />
-
-        <span className="text-[10px] uppercase tracking-[0.08em] text-arena-faint">
-          Prompt
-        </span>
-        <div className="flex items-center gap-0.5 rounded-md border border-arena-border p-0.5">
-          {PROMPT_VERSIONS.map((pv) => (
-            <button
-              key={pv.version}
-              onClick={() => setPromptVersion(pv.version)}
-              title={pv.description}
-              className={`rounded px-2 py-0.5 text-[11px] transition-colors ${
-                promptVersion === pv.version
-                  ? "bg-arena-text text-arena-bg"
-                  : "text-arena-dim hover:text-arena-text"
-              }`}
-            >
-              {pv.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <Label>Prompt</Label>
+          <Segmented
+            value={promptVersion}
+            onChange={setPromptVersion}
+            options={PROMPT_VERSIONS.map((pv) => ({
+              value: pv.version,
+              label: pv.label,
+              title: pv.description,
+            }))}
+          />
         </div>
-
-        <Divider />
 
         <label
-          className="flex cursor-pointer items-center gap-1.5 text-[11px] text-arena-dim hover:text-arena-text"
+          className="flex cursor-pointer items-center gap-2 text-[11.5px] text-arena-dim transition-colors hover:text-arena-text"
           title="Grade every move with a local Stockfish — free, runs in your browser"
         >
           <input
             type="checkbox"
             checked={engineOn}
             onChange={(e) => setEngineOn(e.target.checked)}
-            className="accent-neutral-200"
+            className="h-3.5 w-3.5 cursor-pointer accent-arena-text"
           />
           Stockfish grading
         </label>
