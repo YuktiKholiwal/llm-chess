@@ -45,3 +45,34 @@ class TestWorkOrdering:
         for cut in (6, 15, 31):
             counts = Counter(m for _, m in work[:cut])
             assert max(counts.values()) - min(counts.values()) <= 1
+
+
+class TestResume:
+    """What may be treated as already done.
+
+    A model that answered badly has produced a result and must not be asked
+    again -- rerunning it would quietly resample until it looked better. A
+    request that never reached the model has produced nothing, and caching it
+    as though it had would drop those tasks from every future run.
+    """
+
+    @staticmethod
+    def cache_keys(rows: list[dict]) -> set[tuple[str, str]]:
+        kept = [row for row in rows if not row.get("error")]
+        return {(row["task_id"], row["model"]) for row in kept}
+
+    def test_a_bad_answer_counts_as_done(self):
+        rows = [{"task_id": "t1", "model": "m", "move": None, "legal": False, "error": None}]
+        assert self.cache_keys(rows) == {("t1", "m")}
+
+    def test_a_failed_request_does_not(self):
+        rows = [{"task_id": "t1", "model": "m", "error": "402 Payment Required"}]
+        assert self.cache_keys(rows) == set()
+
+    def test_only_the_failures_are_dropped(self):
+        rows = [
+            {"task_id": "t1", "model": "m", "error": None},
+            {"task_id": "t2", "model": "m", "error": "HTTPStatusError: 402"},
+            {"task_id": "t3", "model": "m", "error": None},
+        ]
+        assert self.cache_keys(rows) == {("t1", "m"), ("t3", "m")}

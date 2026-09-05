@@ -196,6 +196,14 @@ def run(cfg: Config, args: argparse.Namespace) -> None:
         existing = [row for row in existing if row["model"] not in selected]
         write_jsonl(RUNS_PATH, existing)
 
+    # A row that failed for infrastructure reasons is not a result, so it must
+    # not be cached as one. Otherwise the tasks lost to an outage or an
+    # exhausted account would be skipped permanently on every later resume --
+    # silently, and only for the models unlucky enough to be running at the
+    # time.
+    existing = [row for row in existing if not row.get("error")]
+    write_jsonl(RUNS_PATH, existing)
+
     done = {(row["task_id"], row["model"]) for row in existing}
     # Task-major rather than model-major, over band-interleaved tasks. A run
     # that dies partway -- a cost cap, an exhausted account, a provider outage

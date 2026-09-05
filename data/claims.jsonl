@@ -1,0 +1,343 @@
+{"task_id": "rPWjo", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's rook can deliver a check on the same rank as White's king", "type": "threat", "subject": "b4", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.001696}
+{"task_id": "rPWjo", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "forcing the king to move and gaining tempo while keeping the rook and knight coordinated against White's advanced pawns", "type": "plan", "subject": "", "structured": null}
+{"task_id": "uwO40", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Queens are mutually attacking each other", "type": "state", "subject": "", "structured": null, "cost_usd": 0.001977}
+{"task_id": "uwO40", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Trading is safe", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "uwO40", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Rd1 recaptures on d6", "type": "threat", "subject": "d6", "structured": null}
+{"task_id": "uwO40", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "material balance without loss", "type": "state", "subject": "", "structured": {"kind": "material", "count": 0.0}}
+{"task_id": "HxTnb", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Pushing b5-b6 forces a7xb6", "type": "threat", "subject": "b6", "structured": null, "cost_usd": 0.002037}
+{"task_id": "HxTnb", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "after which the a4 pawn is free to run to promotion", "type": "plan", "subject": "a4", "structured": null}
+{"task_id": "HxTnb", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the dark-squared bishop cannot control the light-square promotion path", "type": "state", "subject": "", "structured": null}
+{"task_id": "HxTnb", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "a8 is light", "type": "state", "subject": "a8", "structured": null}
+{"task_id": "hPTg4", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on a6 is attacked by the rook on a4", "type": "state", "subject": "a6", "structured": {"kind": "attacked", "square": "a6", "by": "black"}, "cost_usd": 0.001957}
+{"task_id": "hPTg4", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Giving check with Nb8+ forces the black king to move", "type": "threat", "subject": "b8", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "hPTg4", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the knight to escape safely without losing material", "type": "plan", "subject": "", "structured": null}
+{"task_id": "zb6P7", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Rc7-c6+ delivers check", "type": "threat", "subject": "c6", "structured": {"kind": "check", "by": "white"}, "cost_usd": 0.001913}
+{"task_id": "zb6P7", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Rc7-c6+ also attacking the rook on d6", "type": "state", "subject": "d6", "structured": {"kind": "attacked", "square": "d6", "by": "white"}}
+{"task_id": "zb6P7", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "winning material after the king moves", "type": "threat", "subject": "", "structured": null}
+{"task_id": "BpBjT", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Qxb7 wins a pawn", "type": "threat", "subject": "b7", "structured": null, "cost_usd": 0.002085}
+{"task_id": "BpBjT", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Qxb7 forking the rook on a8 and the knight on c6", "type": "threat", "subject": "", "structured": null}
+{"task_id": "BpBjT", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "neither defended piece can be saved simultaneously", "type": "state", "subject": "", "structured": null}
+{"task_id": "BpBjT", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "after Rb8, Qxc6+ wins material with check", "type": "threat", "subject": "c6", "structured": null}
+{"task_id": "vUrqT", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's bishop is blocking its own rook on e4 from attacking the queen on e2", "type": "state", "subject": "e3", "structured": null, "cost_usd": 0.002501}
+{"task_id": "vUrqT", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Playing Be3-g1+ gives check to the king on h2", "type": "threat", "subject": "g1", "structured": {"kind": "check", "by": "black"}}
+{"task_id": "vUrqT", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Playing Be3-g1 clears the e-file", "type": "plan", "subject": "", "structured": null}
+{"task_id": "vUrqT", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White has no way to defend both the check and the queen", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "vUrqT", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "after Kxg1 or Kh1, Rxe2 wins the queen outright", "type": "threat", "subject": "e2", "structured": null}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black king is trapped on h7", "type": "state", "subject": "h7", "structured": null, "cost_usd": 0.00258}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Pushing h5-h6 forces further weakening", "type": "threat", "subject": "h6", "structured": null}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "if gxh6, then g5-g6+ drives the king into a mating net", "type": "threat", "subject": "g6", "structured": null}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White's king and rook support the mating net", "type": "state", "subject": "", "structured": null}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "ignoring h5-h6 leads to hxg7 with a passed pawn storm", "type": "threat", "subject": "g7", "structured": null}
+{"task_id": "iS9Y2", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "This creates the fastest decisive attack", "type": "plan", "subject": "", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White's knight on g5 threatens Nxf7+", "type": "threat", "subject": "g5", "structured": {"kind": "piece_on_square", "square": "g5", "piece": "knight", "by": "white"}, "cost_usd": 0.00278}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Nxf7+ forks the king on h8 and the queen on d8", "type": "threat", "subject": "", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "this wins material", "type": "threat", "subject": "", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black must eliminate this threat immediately", "type": "plan", "subject": "", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Playing h6 attacks the knight", "type": "threat", "subject": "g5", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "h6 forces the knight to retreat", "type": "plan", "subject": "", "structured": null}
+{"task_id": "L3D7U", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "h6 neutralizes the fork", "type": "plan", "subject": "", "structured": null}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The rook on f1 can check the king along the 2nd rank with Rf2+", "type": "threat", "subject": "f1", "structured": null, "cost_usd": 0.00301}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "f2 is defended by the rook on f8 along the f-file", "type": "state", "subject": "f2", "structured": {"kind": "defended", "square": "f2", "by": "black"}}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the king cannot capture on f2", "type": "state", "subject": "f2", "structured": null}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the king has no blocking piece", "type": "state", "subject": "", "structured": null}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the king must step aside to g1, h2 or h3", "type": "state", "subject": "", "structured": null}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Rxd2 wins the knight", "type": "threat", "subject": "d2", "structured": null}
+{"task_id": "Wtctx", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "nothing defends d2", "type": "state", "subject": "d2", "structured": {"kind": "defended", "square": "d2", "by": "white", "negated": true}}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's queen can capture the c2 pawn with check", "type": "threat", "subject": "c2", "structured": null, "cost_usd": 0.003094}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "b1 is covered by the queen", "type": "state", "subject": "b1", "structured": {"kind": "attacked", "square": "b1", "by": "black"}}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "b2 is covered by the queen", "type": "state", "subject": "b2", "structured": {"kind": "attacked", "square": "b2", "by": "black"}}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "c2 is defended by the rook on c8", "type": "state", "subject": "c2", "structured": {"kind": "defended", "square": "c2", "by": "black"}}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "d1 is occupied by White's own pieces", "type": "state", "subject": "d1", "structured": null}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "d2 is occupied by White's own pieces", "type": "state", "subject": "d2", "structured": null}
+{"task_id": "3W2ct", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "this is checkmate", "type": "threat", "subject": "", "structured": {"kind": "mate_in", "count": 1, "by": "black"}}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on d6 can jump to c4 with check", "type": "threat", "subject": "d6", "structured": {"kind": "piece_on_square", "square": "d6", "piece": "knight", "by": "black"}, "cost_usd": 0.002903}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "c4 gives check to the white king on d2", "type": "threat", "subject": "c4", "structured": null}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the knight on c4 forks the white king on d2", "type": "threat", "subject": "c4", "structured": null}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the knight on c4 attacks pawns on a3", "type": "threat", "subject": "a3", "structured": null}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the knight on c4 attacks pawns on b2", "type": "threat", "subject": "b2", "structured": null}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the knight on c4 is safe from immediate capture", "type": "state", "subject": "c4", "structured": null}
+{"task_id": "xjzsD", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Nc4 wins material", "type": "plan", "subject": "", "structured": null}
+{"task_id": "s7Hec", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's king can capture the undefended white a5-pawn", "type": "threat", "subject": "a5", "structured": {"kind": "hanging", "square": "a5"}, "cost_usd": 0.001916}
+{"task_id": "s7Hec", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the a5-pawn is not adjacent to the white king", "type": "state", "subject": "a5", "structured": null}
+{"task_id": "s7Hec", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "White's outside passed pawn is the key long-term threat", "type": "unverifiable", "subject": "a5", "structured": null}
+{"task_id": "4OFsi", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Qe3+ hits the king along the e3-g5 diagonal", "type": "threat", "subject": "g5", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.002211}
+{"task_id": "4OFsi", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "nothing can block or capture", "type": "state", "subject": "", "structured": null}
+{"task_id": "4OFsi", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the rook on d4 is undefended", "type": "state", "subject": "d4", "structured": {"kind": "defended", "square": "d4", "by": "white", "negated": true}}
+{"task_id": "4OFsi", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the queen will capture the rook on d4", "type": "plan", "subject": "d4", "structured": null}
+{"task_id": "5pTTD", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The pawn on g4 can capture the black bishop on f5", "type": "threat", "subject": "g4", "structured": {"kind": "piece_on_square", "square": "g4", "piece": "pawn", "by": "white"}, "cost_usd": 0.002066}
+{"task_id": "5pTTD", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "nothing recaptures favorably", "type": "state", "subject": "f5", "structured": null}
+{"task_id": "5pTTD", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "The pawn on g4 can capture the black bishop on f5 directly, winning a piece for free", "type": "threat", "subject": "f5", "structured": null}
+{"task_id": "2UfqJ", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White threatens Nxg7+", "type": "threat", "subject": "g7", "structured": {"kind": "attacked", "square": "g7", "by": "white"}, "cost_usd": 0.002461}
+{"task_id": "2UfqJ", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Nxg7+ forks king and rook h8", "type": "threat", "subject": "", "structured": null}
+{"task_id": "2UfqJ", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Black should move the rook off h8 to g8", "type": "plan", "subject": "h8", "structured": null}
+{"task_id": "2UfqJ", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "moving the rook to g8 defends g7 along the file", "type": "plan", "subject": "g7", "structured": null}
+{"task_id": "2UfqJ", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "moving the rook to g8 removes the fork target", "type": "plan", "subject": "h8", "structured": null}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's queen on g2 attacks the rook on h1", "type": "state", "subject": "g2", "structured": {"kind": "attacked", "square": "h1", "by": "black"}, "cost_usd": 0.00283}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Rh1-g1 pins the queen to nothing", "type": "state", "subject": "g2", "structured": null}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Rh1-g1 directly attacks the queen", "type": "state", "subject": "g2", "structured": {"kind": "attacked", "square": "g2", "by": "white"}}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the queen cannot safely take f2", "type": "state", "subject": "f2", "structured": null}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "f2 is defended by the king", "type": "state", "subject": "f2", "structured": {"kind": "defended", "square": "f2", "by": "white"}}
+{"task_id": "OBD9M", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Rh1-g1 forces the queen to retreat", "type": "threat", "subject": "g2", "structured": null}
+{"task_id": "pPOJg", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The b6 pawn can advance to b7", "type": "threat", "subject": "b6", "structured": null, "cost_usd": 0.002283}
+{"task_id": "pPOJg", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "b7 forks the rook on c8", "type": "threat", "subject": "c8", "structured": null}
+{"task_id": "pPOJg", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "b7 threatens to promote on b8", "type": "threat", "subject": "b8", "structured": null}
+{"task_id": "pPOJg", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black cannot both save the rook and stop promotion", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "pPOJg", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Qb1+ is simply met by Kxb1", "type": "threat", "subject": "", "structured": null}
+{"task_id": "L4F3I", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The b2 pawn is one square from promotion", "type": "state", "subject": "b2", "structured": {"kind": "piece_on_square", "square": "b2", "piece": "pawn", "by": "black"}, "cost_usd": 0.002087}
+{"task_id": "L4F3I", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the white rook on b1 can simply capture it", "type": "threat", "subject": "b1", "structured": null}
+{"task_id": "L4F3I", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "eliminating the threat", "type": "plan", "subject": "", "structured": null}
+{"task_id": "L4F3I", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "winning material", "type": "plan", "subject": "", "structured": null}
+{"task_id": "IXCby", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Rc1-c4 attacks the undefended black queen on b4", "type": "state", "subject": "b4", "structured": {"kind": "attacked", "square": "b4", "by": "white"}, "cost_usd": 0.002329}
+{"task_id": "IXCby", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the black queen on b4 is undefended", "type": "state", "subject": "b4", "structured": {"kind": "defended", "square": "b4", "by": "black", "negated": true}}
+{"task_id": "IXCby", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "If Qxc4, Nd2xc4 wins the queen for a rook", "type": "threat", "subject": "", "structured": null}
+{"task_id": "IXCby", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black must retreat the queen losing tempo and initiative", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "9qWjN", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White's rook on f6 is undefended", "type": "state", "subject": "f6", "structured": {"kind": "defended", "square": "f6", "by": "white", "negated": true}, "cost_usd": 0.002203}
+{"task_id": "9qWjN", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the knight on d6 doesn't cover f6", "type": "state", "subject": "d6", "structured": null}
+{"task_id": "9qWjN", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the rook on e2 doesn't cover f6", "type": "state", "subject": "e2", "structured": null}
+{"task_id": "9qWjN", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black's rook on f8 can simply capture it for free", "type": "threat", "subject": "f8", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on e4 is attacked by both the f3 pawn and the bishop on d3", "type": "state", "subject": "e4", "structured": {"kind": "attacked", "square": "e4", "by": "white"}, "cost_usd": 0.003043}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "it must move", "type": "threat", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Nc3 loses to bxc3", "type": "threat", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Nd6 loses to exd6", "type": "threat", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Nf2 loses to Kxf2", "type": "threat", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Ng3 loses to hxg3", "type": "threat", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "The only safe retreat is Ng5", "type": "plan", "subject": "", "structured": null}
+{"task_id": "wAgLF", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "Ng5 also eyes the weak f3 pawn", "type": "state", "subject": "f3", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the black queen on d4 can capture the h4 pawn with check", "type": "threat", "subject": "h4", "structured": null, "cost_usd": 0.003096}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "h1 king has only the h-file open to it", "type": "state", "subject": "h1", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "White can block with Rg3-h3", "type": "threat", "subject": "", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White can block with Qc2-h2", "type": "threat", "subject": "", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "White can move the king to g1", "type": "threat", "subject": "", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "moving the king to g1 exposes the g3 rook to a follow-up Qxg3+", "type": "threat", "subject": "g3", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Qxg3+ wins material", "type": "threat", "subject": "g3", "structured": null}
+{"task_id": "PDIUV", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "Black nets the h4 pawn with tempo", "type": "plan", "subject": "h4", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Qxg2+ captures the rook and gives check", "type": "threat", "subject": "g2", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.004015}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "g2 and d2 share rank 2", "type": "state", "subject": "", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the king is forced to d1 or c1", "type": "state", "subject": "d1", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "all other squares are covered by the queen on rank 2", "type": "state", "subject": "", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the rook on e3's rank 3 covers escape squares", "type": "state", "subject": "e3", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the bishop on g3 hitting e1", "type": "state", "subject": "g3", "structured": {"kind": "controls_square", "square": "e1", "by": "black"}}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Re3-e1+ delivers checkmate", "type": "threat", "subject": "e1", "structured": {"kind": "mate_in", "count": 1, "by": "black"}}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "the king cannot capture the rook", "type": "state", "subject": "e1", "structured": null}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "e1 is defended by the bishop on g3", "type": "state", "subject": "e1", "structured": {"kind": "defended", "square": "e1", "by": "black"}}
+{"task_id": "hTdN0", "model": "anthropic/claude-sonnet-5", "claim_id": 9, "text": "every escape square is controlled by the queen or rook", "type": "state", "subject": "", "structured": null}
+{"task_id": "QnR2D", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "After Rxc8, Black must recapture with either the queen or the rook", "type": "threat", "subject": "c8", "structured": null, "cost_usd": 0.002265}
+{"task_id": "QnR2D", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Qxe6+ delivers check", "type": "threat", "subject": "e6", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "QnR2D", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Qxe6+ simultaneously attacks whatever piece sits on c8", "type": "threat", "subject": "c8", "structured": {"kind": "attacked", "square": "c8", "by": "white"}}
+{"task_id": "QnR2D", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Qxe6+ wins material outright", "type": "plan", "subject": "", "structured": null}
+{"task_id": "ngWvr", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White's bishop on b2 is undefended", "type": "state", "subject": "b2", "structured": {"kind": "defended", "square": "b2", "by": "white", "negated": true}, "cost_usd": 0.002455}
+{"task_id": "ngWvr", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Ra1 only guards a2", "type": "state", "subject": "a1", "structured": null}
+{"task_id": "ngWvr", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Capturing the bishop on b2 wins a piece outright", "type": "threat", "subject": "b2", "structured": null}
+{"task_id": "ngWvr", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "if White trades rooks on b2, Black recaptures with the queen", "type": "plan", "subject": "", "structured": null}
+{"task_id": "ngWvr", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Black comes out a clear piece ahead with no counterplay against the black king", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the black queen on e5 eyes e1 through an open file", "type": "state", "subject": "e5", "structured": null, "cost_usd": 0.002707}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the rook is defended by the bishop on f2", "type": "state", "subject": "e1", "structured": {"kind": "defended", "square": "e1", "by": "white"}}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the bishop is otherwise lost for nothing", "type": "state", "subject": "f2", "structured": {"kind": "hanging", "square": "f2"}}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Rxf2 forces Kxf2", "type": "threat", "subject": "", "structured": null}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Qxe1+ wins the rook with check", "type": "threat", "subject": "e1", "structured": null}
+{"task_id": "A0jOX", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Black nets bishop+rook for a rook - a clear material gain", "type": "plan", "subject": "", "structured": null}
+{"task_id": "DxWfR", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The king is in check from the rook on e1", "type": "state", "subject": "e1", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.002418}
+{"task_id": "DxWfR", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the queen does not give check along that line", "type": "state", "subject": "", "structured": null}
+{"task_id": "DxWfR", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "capturing the checking rook with the rook on f1 removes that threat", "type": "threat", "subject": "e1", "structured": null}
+{"task_id": "DxWfR", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "capturing the checking rook with the rook on f1 resolves the check legally", "type": "threat", "subject": "e1", "structured": null}
+{"task_id": "DxWfR", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "capturing the checking rook with the rook on f1 gains material", "type": "threat", "subject": "e1", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on d7 is only defended by the queen on c7", "type": "state", "subject": "d7", "structured": {"kind": "defended", "square": "d7", "by": "black"}, "cost_usd": 0.003264}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Playing Rxd7 wins the knight", "type": "threat", "subject": "d7", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "if Black recaptures with Qxd7, White's queen on b5 lies on the same diagonal (b5-c6-d7)", "type": "state", "subject": "b5", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White can play Qxd7+", "type": "threat", "subject": "d7", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "nothing recaptures on d7", "type": "state", "subject": "d7", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the king is left in check", "type": "state", "subject": "", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "If Black instead moves the queen away to avoid this, White simply keeps the extra knight", "type": "plan", "subject": "", "structured": null}
+{"task_id": "5O7J6", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "Either way this is a decisive material gain", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "zEHev", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the black rook on a2 can capture the undefended a3 pawn", "type": "threat", "subject": "a3", "structured": {"kind": "hanging", "square": "a3"}, "cost_usd": 0.001854}
+{"task_id": "zEHev", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "no white piece defends a3", "type": "state", "subject": "a3", "structured": {"kind": "defended", "square": "a3", "by": "white", "negated": true}}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Rh1+ delivers check along the first rank", "type": "threat", "subject": "h1", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.002911}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "The king cannot go to f1 (still on rank 1, attacked by rook)", "type": "state", "subject": "f1", "structured": {"kind": "attacked", "square": "f1", "by": "black"}}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "The king cannot go to g2 (adjacent to black king on f3)", "type": "state", "subject": "g2", "structured": null}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "f2 is occupied by own pawn", "type": "state", "subject": "f2", "structured": {"kind": "piece_on_square", "square": "f2", "piece": "pawn", "by": "white"}}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "No piece can block or capture the rook", "type": "state", "subject": "", "structured": null}
+{"task_id": "0jC1E", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "This is checkmate", "type": "threat", "subject": "", "structured": {"kind": "mate_in", "count": 1, "by": "black"}}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's a2 pawn is one step from promotion", "type": "state", "subject": "a2", "structured": {"kind": "passed_pawn", "square": "a2", "by": "black"}, "cost_usd": 0.003171}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Black's a2 pawn is the most urgent threat", "type": "unverifiable", "subject": "a2", "structured": null}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "White's rook on c1 can move to a1", "type": "plan", "subject": "c1", "structured": null}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "moving the rook to a1 neutralizes the passed pawn", "type": "plan", "subject": "a1", "structured": null}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the f7 rook remains safely active", "type": "state", "subject": "f7", "structured": null}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the f7 rook isn't attacked by the bishop", "type": "state", "subject": "f7", "structured": {"kind": "attacked", "square": "f7", "by": "black", "negated": true}}
+{"task_id": "JaWSF", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "the f7 rook isn't attacked by the rooks", "type": "state", "subject": "f7", "structured": {"kind": "attacked", "square": "f7", "by": "black", "negated": true}}
+{"task_id": "E302L", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's queen on c2 attacks the bishop on d2", "type": "state", "subject": "d2", "structured": {"kind": "attacked", "square": "d2", "by": "black"}, "cost_usd": 0.002672}
+{"task_id": "E302L", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "by playing Rf1-c1, White attacks the queen", "type": "threat", "subject": "c2", "structured": {"kind": "attacked", "square": "c2", "by": "white"}}
+{"task_id": "E302L", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the rook on c1 is defended by the bishop on d2", "type": "state", "subject": "c1", "structured": {"kind": "defended", "square": "c1", "by": "white"}}
+{"task_id": "E302L", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "if Black captures Qxc1, White recaptures Bxc1, winning the queen for a rook", "type": "threat", "subject": "", "structured": null}
+{"task_id": "E302L", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the queen must retreat, saving the bishop", "type": "plan", "subject": "", "structured": null}
+{"task_id": "LSdlN", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The black knight on h1 is undefended", "type": "state", "subject": "h1", "structured": {"kind": "defended", "square": "h1", "by": "black", "negated": true}, "cost_usd": 0.002261}
+{"task_id": "LSdlN", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the h4 queen's view along the h-file is blocked by White's own h2 pawn", "type": "state", "subject": "", "structured": null}
+{"task_id": "LSdlN", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "White's rook on f1 has a clear path along the first rank to capture it", "type": "threat", "subject": "h1", "structured": null}
+{"task_id": "LSdlN", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White can win material without any risk", "type": "plan", "subject": "", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The black knight on e4 is unsupported apart from tactical tricks", "type": "state", "subject": "e4", "structured": {"kind": "defended", "square": "e4", "by": "black", "negated": true}, "cost_usd": 0.00295}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "f2-f3 forces it to move", "type": "threat", "subject": "e4", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "f2-f3 gains tempo and space", "type": "plan", "subject": "", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "f2-f3 keeps the strong Ne5 intact", "type": "plan", "subject": "e5", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "f2-f3 keeps central pawns intact", "type": "plan", "subject": "", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Qxe4 fails to dxe4 recapturing the queen", "type": "threat", "subject": "e4", "structured": null}
+{"task_id": "ZT4Ab", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "f2-f3 is the safest and strongest practical move", "type": "plan", "subject": "", "structured": null}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The black queen on d5 is currently unchallenged", "type": "state", "subject": "d5", "structured": {"kind": "defended", "square": "d5", "by": "black", "negated": true}, "cost_usd": 0.00302}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the queen is centralizing dangerously", "type": "unverifiable", "subject": "d5", "structured": null}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Advancing the e-pawn to e4 directly attacks the queen", "type": "threat", "subject": "d5", "structured": {"kind": "attacked", "square": "d5", "by": "white"}}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "e4 forces the queen to retreat or trade unfavorably", "type": "threat", "subject": "", "structured": null}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "e4 gains central space", "type": "plan", "subject": "e4", "structured": null}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "e4 opens lines for White's bishop on h4", "type": "plan", "subject": "h4", "structured": null}
+{"task_id": "z2EKn", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "e4 opens lines for White's queen on a1", "type": "plan", "subject": "a1", "structured": null}
+{"task_id": "P3wO8", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's kingside pawns are far advanced", "type": "state", "subject": "", "structured": null, "cost_usd": 0.00217}
+{"task_id": "P3wO8", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "White's king is boxed in on f1", "type": "state", "subject": "f1", "structured": null}
+{"task_id": "P3wO8", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Black should press the attack with the pawns", "type": "plan", "subject": "", "structured": null}
+{"task_id": "P3wO8", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "after g4-g3 (hxg3 fxg3) the pawn mass, king, and knight combine to create decisive mating threats against the confined White king", "type": "threat", "subject": "", "structured": null}
+{"task_id": "f07Qf", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on e5 is undefended", "type": "state", "subject": "e5", "structured": {"kind": "defended", "square": "e5", "by": "black", "negated": true}, "cost_usd": 0.00224}
+{"task_id": "f07Qf", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Capturing it with the f3 knight wins a piece", "type": "threat", "subject": "e5", "structured": null}
+{"task_id": "f07Qf", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Bd6 is adequately defended by the queen on d2 along the d-file", "type": "state", "subject": "d6", "structured": {"kind": "defended", "square": "d6", "by": "white"}}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on f5 and queen on d3 form a battery along the a2-g8 diagonal", "type": "state", "subject": "", "structured": null, "cost_usd": 0.004836}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the battery is currently blocked by the knight itself", "type": "state", "subject": "f5", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Playing Nh6+ forces gxh6", "type": "threat", "subject": "h6", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Kh8 allows strong follow-ups", "type": "threat", "subject": "h8", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Kh7 allows strong follow-ups", "type": "threat", "subject": "h7", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Nh6+ clears the f5-g6-h7 diagonal completely for the queen", "type": "plan", "subject": "", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Qh7# is checkmate", "type": "threat", "subject": "h7", "structured": {"kind": "mate_in", "count": 1, "by": "white"}}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "the king on g8 has no escape", "type": "state", "subject": "g8", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "f8 is blocked by its own rook", "type": "state", "subject": "f8", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 9, "text": "f7 is blocked by pawn", "type": "state", "subject": "f7", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 10, "text": "g7 and g8 are covered by the queen", "type": "state", "subject": "", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 11, "text": "h8 is covered along the file", "type": "state", "subject": "h8", "structured": null}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 12, "text": "Qh7 is not defended against or capturable", "type": "state", "subject": "h7", "structured": {"kind": "defended", "square": "h7", "by": "black", "negated": true}}
+{"task_id": "WvhFG", "model": "anthropic/claude-sonnet-5", "claim_id": 13, "text": "This is a forced mating combination", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's knight can deliver a devastating check", "type": "threat", "subject": "c3", "structured": {"kind": "check", "by": "black"}, "cost_usd": 0.002941}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Ne2+ forces the white king to h1 or h2", "type": "threat", "subject": "e2", "structured": null}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "nothing can block or capture the knight", "type": "state", "subject": "e2", "structured": null}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the g2 pawn promotes with check (g1=Q+)", "type": "threat", "subject": "g2", "structured": {"kind": "check", "by": "black"}}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the knight covers all escape squares (g3, f4, etc.)", "type": "state", "subject": "e2", "structured": null}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the queen covers the remaining squares", "type": "state", "subject": "g1", "structured": null}
+{"task_id": "MaJk5", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "this is checkmate", "type": "threat", "subject": "", "structured": {"kind": "mate_in", "count": 2, "by": "black"}}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's queen on c4 attacks the c3 pawn", "type": "state", "subject": "c3", "structured": {"kind": "attacked", "square": "c3", "by": "black"}, "cost_usd": 0.003191}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the c3 pawn is currently undefended", "type": "state", "subject": "c3", "structured": {"kind": "defended", "square": "c3", "by": "white", "negated": true}}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "after ...Qxc3 the queen would fork the rooks on a1 and e3", "type": "threat", "subject": "", "structured": null}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Moving the bishop from e5 to d4 defends c3", "type": "plan", "subject": "c3", "structured": null}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Bd4 keeps the powerful long diagonal aimed at g7/h8", "type": "plan", "subject": "", "structured": null}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Bd4 maintains pressure on the black king", "type": "plan", "subject": "", "structured": null}
+{"task_id": "lp8Vq", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "If Black tries ...Qxd4, then cxd4 wins the queen for minimal material", "type": "threat", "subject": "", "structured": null}
+{"task_id": "69t83", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the white rook on f2 is undefended", "type": "state", "subject": "f2", "structured": {"kind": "defended", "square": "f2", "by": "white", "negated": true}, "cost_usd": 0.002625}
+{"task_id": "69t83", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the bishop on g2 only covers diagonals f1/h1/f3/h3, not f2", "type": "state", "subject": "g2", "structured": null}
+{"task_id": "69t83", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the king on h2 is not adjacent to f2", "type": "state", "subject": "h2", "structured": null}
+{"task_id": "69t83", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black's queen on h4 can reach f2 via the h4-g3-f2 diagonal", "type": "threat", "subject": "h4", "structured": null}
+{"task_id": "69t83", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Black's queen can capture the rook for free without allowing recapture", "type": "threat", "subject": "f2", "structured": null}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's bishop on e8 blocks the a8-rook from ever reaching g8", "type": "state", "subject": "e8", "structured": {"kind": "piece_on_square", "square": "e8", "piece": "bishop", "by": "black"}, "cost_usd": 0.003435}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Playing Rxh6+ forces gxh6", "type": "threat", "subject": "h6", "structured": null}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Kg8 is blocked by the black rook", "type": "state", "subject": "g8", "structured": null}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Qxg8+ is unstoppable mate", "type": "threat", "subject": "g8", "structured": {"kind": "mate_in", "count": 1, "by": "white"}}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "the king cannot capture", "type": "state", "subject": "", "structured": null}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Rg1 covers g8 through the now-open g-file", "type": "state", "subject": "g8", "structured": {"kind": "controls_square", "square": "g8", "by": "white"}}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "the rook on a8 is blocked by its own bishop on e8", "type": "state", "subject": "a8", "structured": null}
+{"task_id": "plbGC", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "the bishop cannot reach g8", "type": "state", "subject": "e8", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The queen on f3 is attacked by the bishop on g4", "type": "state", "subject": "f3", "structured": {"kind": "attacked", "square": "f3", "by": "black"}, "cost_usd": 0.004205}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "capturing (Qxg4 Nxg4) loses the queen for a minor piece", "type": "threat", "subject": "", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the knight on f6 defends g4", "type": "state", "subject": "g4", "structured": {"kind": "defended", "square": "g4", "by": "black"}}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "The knight on d5 is safe", "type": "state", "subject": "d5", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Qe3 is captured by ...dxe3", "type": "threat", "subject": "e3", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "Qf4 is captured by ...exf4", "type": "threat", "subject": "f4", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Qh5 is captured by ...Nxh5", "type": "threat", "subject": "h5", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "Qg3 is not attacked by any black piece", "type": "state", "subject": "g3", "structured": {"kind": "attacked", "square": "g3", "by": "black", "negated": true}}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "the bishop's diagonal to g3 is blocked by the e5 pawn", "type": "state", "subject": "", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 9, "text": "the knight on f6 doesn't reach g3", "type": "state", "subject": "g3", "structured": null}
+{"task_id": "3gNwP", "model": "anthropic/claude-sonnet-5", "claim_id": 10, "text": "This move safely preserves the queen while keeping strong central pressure", "type": "plan", "subject": "", "structured": null}
+{"task_id": "Aa5pa", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The knight on b4 is attacked by the a3 pawn", "type": "state", "subject": "b4", "structured": {"kind": "attacked", "square": "b4", "by": "white"}, "cost_usd": 0.002579}
+{"task_id": "Aa5pa", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "it must move or capture something useful", "type": "plan", "subject": "b4", "structured": null}
+{"task_id": "Aa5pa", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Taking the d5 pawn wins material", "type": "threat", "subject": "d5", "structured": null}
+{"task_id": "Aa5pa", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "after ...Nxd5, if Nc3xd5 then Bxd5 recaptures", "type": "threat", "subject": "", "structured": null}
+{"task_id": "Aa5pa", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Black up a clean pawn", "type": "state", "subject": "", "structured": {"kind": "material", "count": -1.0}}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's knight on f5 attacks the queen on e3", "type": "state", "subject": "e3", "structured": {"kind": "attacked", "square": "e3", "by": "black"}, "cost_usd": 0.00345}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Ne4xf6+ forces an immediate response", "type": "threat", "subject": "f6", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Ne4xf6+ is check", "type": "state", "subject": "f6", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the move trades knights on equal terms", "type": "plan", "subject": "", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "if gxf6 it shatters Black's kingside pawn cover", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "it gains a tempo", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "after Black deals with the check White can safely reposition the queen away from the f5-knight's attack", "type": "plan", "subject": "", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "the move opens lines toward the black king for a strong follow-up attack", "type": "plan", "subject": "", "structured": null}
+{"task_id": "5MPMl", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "Qg3+ is a follow-up", "type": "threat", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White has no queen", "type": "state", "subject": "", "structured": null, "cost_usd": 0.003802}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "a powerful pawn duo on g6/h6 aimed at the black king", "type": "state", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "black's queen on d2 has strayed deep with no real threats", "type": "state", "subject": "d2", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Qxe2 fails to Nxe2", "type": "threat", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Qc1+ fails to Rxc1", "type": "threat", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "The rook on f8 is the last real defender near the king", "type": "state", "subject": "f8", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "Removing it with a check forces the king into the open", "type": "plan", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "hxg7+ rips open the kingside completely", "type": "threat", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "White has a winning mating attack", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 9, "text": "Rxf8+ is essentially forced-response inducing", "type": "threat", "subject": "f8", "structured": null}
+{"task_id": "SXrHg", "model": "anthropic/claude-sonnet-5", "claim_id": 10, "text": "after Kxf8 hxg7+ the black king is dragged into a fatal exposure", "type": "threat", "subject": "", "structured": null}
+{"task_id": "NlzKJ", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the bishop on c6 can capture the undefended pawn on d5", "type": "threat", "subject": "d5", "structured": null, "cost_usd": 0.002364}
+{"task_id": "NlzKJ", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the pawn on d5 is undefended", "type": "state", "subject": "d5", "structured": {"kind": "defended", "square": "d5", "by": "white", "negated": true}}
+{"task_id": "NlzKJ", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Be5 does not guard d5", "type": "state", "subject": "e5", "structured": null}
+{"task_id": "NlzKJ", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "no rook guards d5", "type": "state", "subject": "d5", "structured": null}
+{"task_id": "NlzKJ", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "this wins a clean pawn", "type": "plan", "subject": "", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White's queen on a2 lies on the a2–g8 diagonal", "type": "state", "subject": "a2", "structured": {"kind": "piece_on_square", "square": "a2", "piece": "queen", "by": "white"}, "cost_usd": 0.004089}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the a2–g8 diagonal is currently blocked only by the pawn on f7", "type": "state", "subject": "f7", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the black king on g8 would be exposed to check along that diagonal if the f7 pawn disappears", "type": "state", "subject": "g8", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "the f7 pawn cannot be recaptured by the king after White captures it", "type": "state", "subject": "f7", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Kxf7 would walk into check from Qa2", "type": "threat", "subject": "f7", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the g7 pawn only guards f6/h6", "type": "state", "subject": "g7", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "the e8 rook doesn't cover f7", "type": "state", "subject": "e8", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "Rxf7 wins a pawn outright", "type": "plan", "subject": "f7", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 8, "text": "Rxf7 lands a rook deep in Black's camp near the king", "type": "plan", "subject": "f7", "structured": null}
+{"task_id": "hCYxi", "model": "anthropic/claude-sonnet-5", "claim_id": 9, "text": "Rxf7 creates further threats (Rxg7+, mating ideas with the h4/g4 pawns)", "type": "plan", "subject": "", "structured": null}
+{"task_id": "LvVki", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black should push h5-h4", "type": "plan", "subject": "h4", "structured": null, "cost_usd": 0.002167}
+{"task_id": "LvVki", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "h4 challenges the g3 pawn", "type": "state", "subject": "g3", "structured": null}
+{"task_id": "LvVki", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "White will either capture or block", "type": "threat", "subject": "", "structured": null}
+{"task_id": "LvVki", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "capturing opens lines for Black's king to infiltrate", "type": "plan", "subject": "", "structured": null}
+{"task_id": "LvVki", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "h4 gains space for the king", "type": "plan", "subject": "", "structured": null}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the pawn push f4-f5 directly attacks the black queen on g6", "type": "state", "subject": "g6", "structured": {"kind": "attacked", "square": "g6", "by": "white"}, "cost_usd": 0.002933}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the pawn push f4-f5 threatens the e6 pawn", "type": "threat", "subject": "e6", "structured": null}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "if Black captures with Qxf5, then Rxf5 exf5 nets White a queen for rook and pawn, a clearly favorable trade", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "if Black instead retreats the queen, White simply wins the e6 pawn", "type": "plan", "subject": "e6", "structured": null}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "if Black instead retreats the queen, White gains a big space/initiative advantage", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "SEtGv", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "the pawn push f4-f5 is the strongest practical shot in the position", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "the pawn on e6 masks a discovered check from the rook on e1 against the black king on e8", "type": "state", "subject": "e6", "structured": null, "cost_usd": 0.002903}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Playing Nxe6+ opens this discovered check", "type": "threat", "subject": "e6", "structured": null}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the knight also attacks the rook on d8", "type": "state", "subject": "d8", "structured": {"kind": "attacked", "square": "d8", "by": "white"}}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black must move the king off the e-file", "type": "threat", "subject": "e8", "structured": null}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "no piece can block on e7", "type": "state", "subject": "e7", "structured": null}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "after which Nxd8 wins the rook outright", "type": "plan", "subject": "d8", "structured": null}
+{"task_id": "vBEyj", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "winning material decisively", "type": "plan", "subject": "", "structured": null}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "White threatens Nxd6+, forking king and queen with check", "type": "threat", "subject": "d6", "structured": null, "cost_usd": 0.002872}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the knight on f7 hits d6 and gives a knight-check pattern to e8", "type": "state", "subject": "f7", "structured": null}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the rook on b7 is undefended", "type": "state", "subject": "b7", "structured": {"kind": "defended", "square": "b7", "by": "white", "negated": true}}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Qd7 escapes the knight's reach", "type": "plan", "subject": "d7", "structured": null}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "Qd7 simultaneously attacks the undefended rook on b7 along the 7th rank", "type": "plan", "subject": "b7", "structured": null}
+{"task_id": "LJI4u", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "f7 doesn't cover d7", "type": "state", "subject": "d7", "structured": null}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Rf6xe6+ wins the e6 pawn with check", "type": "threat", "subject": "e6", "structured": {"kind": "attacked", "square": "e6", "by": "white"}, "cost_usd": 0.002788}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "rook now on e-file directly checks Ke8", "type": "state", "subject": "e8", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Black cannot capture the rook", "type": "state", "subject": "e6", "structured": null}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White's rook on e6 also attacks the g6 knight along the 6th rank", "type": "state", "subject": "g6", "structured": {"kind": "attacked", "square": "g6", "by": "white"}}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "winning it next move for free", "type": "threat", "subject": "g6", "structured": null}
+{"task_id": "uH2Vv", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "This nets pawn+knight", "type": "plan", "subject": "", "structured": null}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Playing Qxg6 attacks the black queen on f7", "type": "threat", "subject": "f7", "structured": {"kind": "attacked", "square": "f7", "by": "white"}, "cost_usd": 0.002888}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Qxg6 forces Qxg6 (otherwise Qxf7 wins outright)", "type": "threat", "subject": "", "structured": null}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Qxf7 wins outright", "type": "threat", "subject": "f7", "structured": null}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "after Qxg6 Rxg6 recaptures the queen", "type": "threat", "subject": "g6", "structured": null}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "no safe recapture available to Black", "type": "state", "subject": "g6", "structured": null}
+{"task_id": "sccjo", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "knight g8 and rook h8 don't guard g6", "type": "state", "subject": "g6", "structured": {"kind": "defended", "square": "g6", "by": "black", "negated": true}}
+{"task_id": "GGfGW", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The a-pawn is a passed pawn", "type": "state", "subject": "a5", "structured": {"kind": "passed_pawn", "square": "a5", "by": "white"}, "cost_usd": 0.002263}
+{"task_id": "GGfGW", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "the a-pawn is supported by the rook on b6", "type": "state", "subject": "a5", "structured": {"kind": "defended", "square": "a5", "by": "white"}}
+{"task_id": "GGfGW", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "pushing it starts an unstoppable promotion race", "type": "threat", "subject": "a5", "structured": null}
+{"task_id": "GGfGW", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Black has no way to stop both the pawn and defend against Rb8", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "qY552", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Nh5+ forces gxh5", "type": "threat", "subject": "h5", "structured": null, "cost_usd": 0.002052}
+{"task_id": "qY552", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "gxh5 is the only legal response to check", "type": "state", "subject": "", "structured": null}
+{"task_id": "qY552", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "the pawn that defended the knight on f6 is removed", "type": "plan", "subject": "f6", "structured": null}
+{"task_id": "qY552", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "Qxf6+ wins the knight with check", "type": "threat", "subject": "f6", "structured": null}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "Black's rooks are doubled on the g-file against White's king on f1", "type": "state", "subject": "", "structured": null, "cost_usd": 0.00347}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "Playing Rg3-g1+ is check", "type": "threat", "subject": "g1", "structured": {"kind": "check", "by": "black"}}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "Rg3-g1+ cannot be answered by Kxg1 because the rook is defended by the other rook on g8", "type": "state", "subject": "g1", "structured": {"kind": "defended", "square": "g1", "by": "black"}}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 3, "text": "White's king is forced to e2", "type": "plan", "subject": "e2", "structured": null}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 4, "text": "f2 is blocked by White's own rook", "type": "state", "subject": "f2", "structured": null}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 5, "text": "g2 is covered by the g8-rook", "type": "state", "subject": "g2", "structured": {"kind": "attacked", "square": "g2", "by": "black"}}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 6, "text": "the king becomes vulnerable to further checks (e.g. ...Re8+)", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "fKSnX", "model": "anthropic/claude-sonnet-5", "claim_id": 7, "text": "White must always find the only safe square to avoid losing material outright", "type": "unverifiable", "subject": "", "structured": null}
+{"task_id": "82rDP", "model": "anthropic/claude-sonnet-5", "claim_id": 0, "text": "The bishop on a3 attacks the black bishop on e7", "type": "state", "subject": "a3", "structured": {"kind": "attacked", "square": "e7", "by": "white"}, "cost_usd": 0.002016}
+{"task_id": "82rDP", "model": "anthropic/claude-sonnet-5", "claim_id": 1, "text": "taking it comes with check since the king is on f8", "type": "threat", "subject": "e7", "structured": {"kind": "check", "by": "white"}}
+{"task_id": "82rDP", "model": "anthropic/claude-sonnet-5", "claim_id": 2, "text": "taking it wins material", "type": "plan", "subject": "e7", "structured": null}

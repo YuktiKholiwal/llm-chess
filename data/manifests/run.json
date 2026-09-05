@@ -1,7 +1,7 @@
 {
   "stage": "run",
-  "finished_at": "2026-09-05T20:23:07+00:00",
-  "commit": "ffa05f9-dirty",
+  "finished_at": "2026-09-05T20:38:57+00:00",
+  "commit": "b12fad4-dirty",
   "models": [
     {
       "id": "anthropic/claude-sonnet-5",
@@ -23,12 +23,12 @@
     }
   ],
   "tasks": 200,
-  "requested": 600,
+  "requested": 3,
   "prompt": {
     "version": "v1",
     "hash": "b9e2bde11137"
   },
   "max_cost_usd": 40.0,
-  "cost_usd": 21.0512,
-  "stopped_early": "3 consecutive request failures; scoring these as model failures would be wrong"
+  "cost_usd": 0.083,
+  "stopped_early": null
 }
