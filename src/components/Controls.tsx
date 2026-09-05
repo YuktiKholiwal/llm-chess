@@ -3,8 +3,9 @@
 import {
   Button,
   DemoIcon,
-  Divider,
+  Disclosure,
   Label,
+  Panel,
   PauseIcon,
   PlayIcon,
   ResetIcon,
@@ -50,9 +51,17 @@ export function Controls({
   const finished = status === "finished";
   const busy = status === "thinking";
 
+  // Shown on the closed fold, so the conditions a run was played under stay
+  // legible without opening anything.
+  const summary = [
+    mode === "assisted" ? "legal moves shown" : "legal moves hidden",
+    promptVersion,
+    engineOn ? "graded" : "ungraded",
+  ].join(" · ");
+
   return (
-    <div className="rounded-xl border border-arena-border bg-arena-panel">
-      {/* Transport */}
+    <Panel>
+      {/* Transport. The only row a first-time visitor has to understand. */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
         {running ? (
           <Button
@@ -64,11 +73,7 @@ export function Controls({
             Pause
           </Button>
         ) : (
-          <Button
-            onClick={onStart}
-            disabled={finished || busy}
-            variant="primary"
-          >
+          <Button onClick={onStart} disabled={finished || busy} variant="primary">
             <PlayIcon />
             {status === "idle" ? "Start match" : "Resume"}
           </Button>
@@ -85,17 +90,76 @@ export function Controls({
           <ResetIcon />
           New
         </Button>
-        <Divider />
+
         <Button
           onClick={onDemo}
+          variant="ghost"
+          className="ml-auto"
           title="Replay a real master game — no API calls, no cost"
         >
           <DemoIcon />
           Demo
         </Button>
+      </div>
 
-        <label className="ml-auto flex items-center gap-2.5 text-[11.5px] text-arena-faint">
-          <span>Pace</span>
+      {/* The knobs below change what is being measured, not how it looks. They
+          are experimental conditions, so they stay folded away rather than
+          asking a first-time visitor to have an opinion about them. */}
+      <Disclosure label="Conditions" summary={summary}>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <div className="flex items-center gap-2">
+            <Label>Legal moves</Label>
+            <Segmented
+              value={mode}
+              onChange={setMode}
+              options={[
+                {
+                  value: "assisted",
+                  label: "Shown",
+                  title:
+                    "The model is given the list of legal moves. Tests chess judgment only.",
+                },
+                {
+                  value: "blind",
+                  label: "Hidden",
+                  title:
+                    "The model gets only the position and must work out legality itself. Much harder.",
+                },
+              ]}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Label>Prompt</Label>
+            <Segmented
+              value={promptVersion}
+              onChange={setPromptVersion}
+              options={PROMPT_VERSIONS.map((pv) => ({
+                value: pv.version,
+                label: pv.label,
+                title: pv.description,
+              }))}
+            />
+          </div>
+
+          <label
+            className="flex cursor-pointer items-center gap-2 text-[11.5px] text-arena-dim transition-colors hover:text-arena-text"
+            title="Grade every move with a local Stockfish — free, runs in your browser"
+          >
+            <input
+              type="checkbox"
+              checked={engineOn}
+              onChange={(e) => setEngineOn(e.target.checked)}
+              className="h-3.5 w-3.5 cursor-pointer accent-arena-text"
+            />
+            Stockfish grading
+          </label>
+        </div>
+
+        {/* Playback speed changes nothing about the measurement, so it sits
+            below the hairline rather than among the conditions. */}
+        <div className="mt-3 flex items-center gap-2.5 border-t border-arena-line pt-3">
+          <Label>Pace</Label>
           <input
             type="range"
             min={0}
@@ -103,66 +167,14 @@ export function Controls({
             step={250}
             value={delayMs}
             onChange={(e) => setDelayMs(Number(e.target.value))}
-            className="h-1 w-24 cursor-pointer accent-arena-text"
+            className="h-1 w-32 cursor-pointer accent-arena-text"
             title="Pause between moves"
           />
-          <span className="w-9 text-right font-mono-arena tabular-nums text-arena-dim">
+          <span className="font-mono-arena text-[11.5px] tabular-nums text-arena-dim">
             {(delayMs / 1000).toFixed(1)}s
           </span>
-        </label>
-      </div>
-
-      {/* Match settings. Each label+control is one wrap unit, so a narrow
-          column breaks between groups instead of orphaning a separator. */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-arena-line px-3 py-2.5">
-        <div className="flex items-center gap-2">
-          <Label>Legal moves</Label>
-          <Segmented
-            value={mode}
-            onChange={setMode}
-            options={[
-              {
-                value: "assisted",
-                label: "Shown",
-                title:
-                  "The model is given the list of legal moves. Tests chess judgment only.",
-              },
-              {
-                value: "blind",
-                label: "Hidden",
-                title:
-                  "The model gets only the position and must work out legality itself. Much harder.",
-              },
-            ]}
-          />
         </div>
-
-        <div className="flex items-center gap-2">
-          <Label>Prompt</Label>
-          <Segmented
-            value={promptVersion}
-            onChange={setPromptVersion}
-            options={PROMPT_VERSIONS.map((pv) => ({
-              value: pv.version,
-              label: pv.label,
-              title: pv.description,
-            }))}
-          />
-        </div>
-
-        <label
-          className="flex cursor-pointer items-center gap-2 text-[11.5px] text-arena-dim transition-colors hover:text-arena-text"
-          title="Grade every move with a local Stockfish — free, runs in your browser"
-        >
-          <input
-            type="checkbox"
-            checked={engineOn}
-            onChange={(e) => setEngineOn(e.target.checked)}
-            className="h-3.5 w-3.5 cursor-pointer accent-arena-text"
-          />
-          Stockfish grading
-        </label>
-      </div>
-    </div>
+      </Disclosure>
+    </Panel>
   );
 }

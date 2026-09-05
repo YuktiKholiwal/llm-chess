@@ -90,6 +90,13 @@ export const ArrowRightIcon = () => (
   </Svg>
 );
 
+export const ArrowLeftIcon = () => (
+  <Svg size={13}>
+    <path d="M13.25 8H2.75" />
+    <path d="M7 3.75 2.75 8 7 12.25" />
+  </Svg>
+);
+
 /**
  * Always visible, so sortable columns advertise themselves instead of waiting
  * for a hover the user has no reason to try.
@@ -125,6 +132,38 @@ export function Panel({
     <div className={`rounded-xl border border-arena-border bg-arena-panel ${className}`}>
       {children}
     </div>
+  );
+}
+
+/**
+ * A fold. The summary keeps the current values on screen while it is closed,
+ * so collapsing a control group never hides the state it holds — you can read
+ * the settings without opening them.
+ */
+export function Disclosure({
+  label,
+  summary,
+  children,
+}: {
+  label: string;
+  summary?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group border-t border-arena-line">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-[11.5px] text-arena-faint transition-colors hover:text-arena-dim [&::-webkit-details-marker]:hidden">
+        <span className="transition-transform duration-150 group-open:rotate-90">
+          <ChevronIcon />
+        </span>
+        <span className="font-medium">{label}</span>
+        {summary && (
+          <span className="ml-auto truncate pl-3 text-[11px] transition-opacity group-open:opacity-0">
+            {summary}
+          </span>
+        )}
+      </summary>
+      <div className="px-3 pb-3">{children}</div>
+    </details>
   );
 }
 

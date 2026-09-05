@@ -48,7 +48,8 @@ npm install && npm run dev
 
 Run the test suite with `npm test`.
 
-Open [localhost:3000](http://localhost:3000) and hit **◎ Demo**.
+Open [localhost:3000](http://localhost:3000) for the scorecard, then
+**Watch a match play out →** for the arena, and hit **◎ Demo**.
 
 <div align="center">
 <img src="docs/demo-mode.jpg" alt="Demo mode running with no API key" width="85%">
@@ -259,7 +260,8 @@ runner refuses to start if a set's contents no longer match its recorded hash.
 ```
 src/
 ├── app/
-│   ├── page.tsx              the arena
+│   ├── page.tsx              the scorecard — published runs, ranked
+│   ├── arena/page.tsx        the live match
 │   └── api/
 │       ├── ply/route.ts      streams one model's reasoning + validated move
 │       └── models/route.ts   live per-token pricing from the Gateway

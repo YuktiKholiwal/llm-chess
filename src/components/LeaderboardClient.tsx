@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { overlaps, type LeaderboardRow, type LeaderboardView } from "@/bench/leaderboard";
+import { useMemo, useState, type ReactNode } from "react";
+import type { LeaderboardRow, LeaderboardView } from "@/bench/leaderboard";
 import { ChevronIcon, Label, Segmented, SortIcon } from "@/components/ui";
 
 type SortKey =
@@ -57,6 +57,11 @@ const COLUMNS: {
 ];
 
 const clamp = (v: number) => Math.max(0, Math.min(100, v));
+
+/** Inline provenance value — mono so a hash reads as a hash mid-sentence. */
+function Mono({ children }: { children: ReactNode }) {
+  return <span className="font-mono-arena text-arena-text">{children}</span>;
+}
 
 /**
  * Score, its interval and its bar as one cell. Splitting them — number here,
@@ -193,40 +198,34 @@ export function LeaderboardClient({ boards }: { boards: LeaderboardView[] }) {
     });
   }, [board, sort]);
 
-  // Where the top two intervals overlap, the lead is not established.
-  const leadContested =
-    rows.length > 1 &&
-    sort === "accuracy" &&
-    overlaps(rows[0].accuracyCI, rows[1].accuracyCI);
-
   const colCount = COLUMNS.length + 3;
 
   return (
     <>
-      {/* Run provenance, and the condition switcher when there is more than one
-          board — scores from different conditions are different measurements. */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <dl className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          {[
-            { label: "Set", value: board.condition.setId },
-            { label: "Hash", value: board.condition.setHash, title: "Position-set content hash" },
-            { label: "Positions", value: String(board.positions) },
-            { label: "Prompt", value: board.condition.promptVersion },
-            { label: "Grader", value: `${board.gradingEngine} d${board.gradingDepth}` },
-          ].map((it) => (
-            <div key={it.label} className="flex items-baseline gap-1.5" title={it.title}>
-              <dt className="text-[10.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
-                {it.label}
-              </dt>
-              <dd className="font-mono-arena text-[12px] tabular-nums text-arena-dim">
-                {it.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+      {/* Provenance as a sentence, not a row of chips. A reader has to know
+          what produced these numbers before the numbers mean anything, and a
+          label/value strip makes them assemble that sentence themselves. */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <p className="max-w-[78ch] text-[12.5px] leading-[1.75] text-arena-dim">
+          {board.positions} positions from{" "}
+          <Mono>{board.condition.setId}</Mono>, answered under the{" "}
+          <Mono>{board.condition.promptVersion}</Mono> prompt with legal moves{" "}
+          {board.condition.mode === "assisted" ? "shown" : "hidden"}, graded by{" "}
+          {board.gradingEngine} at depth {board.gradingDepth}.{" "}
+          <span className="text-arena-faint">
+            Set hash{" "}
+            <span
+              className="font-mono-arena"
+              title="Content hash of the position set — the same hash means the same positions in the same order"
+            >
+              {board.condition.setHash}
+            </span>
+            .
+          </span>
+        </p>
 
         {boards.length > 1 && (
-          <div className="flex items-center gap-2.5">
+          <div className="flex shrink-0 items-center gap-2.5">
             <Label>Condition</Label>
             <Segmented
               value={String(boardIdx)}
@@ -245,14 +244,6 @@ export function LeaderboardClient({ boards }: { boards: LeaderboardView[] }) {
           </div>
         )}
       </div>
-
-      {leadContested && (
-        <p className="mb-4 flex items-start gap-2.5 rounded-lg border border-arena-warn/25 bg-arena-warn/[0.06] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-arena-warn">
-          <span aria-hidden className="mt-[6px] block h-1 w-1 shrink-0 rounded-full bg-arena-warn" />
-          The top two confidence intervals overlap — this sample does not
-          establish a winner between them.
-        </p>
-      )}
 
       <div className="overflow-x-auto rounded-xl border border-arena-border">
         <table className="w-full min-w-[900px] border-collapse text-left">
