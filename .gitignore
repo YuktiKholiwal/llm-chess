@@ -1,48 +1,14 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 .DS_Store
-*.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
+# Secrets. The template belongs in the repo; the filled-in file does not.
 .env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-public/stockfish/
-
-# ...but the template belongs in the repo
 !.env.example
 
-# Benchmark run outputs (published results live elsewhere)
-runs/
+# ~300MB, and reproducible from a URL. The task bank built from it is committed
+# instead, since that is the part a score depends on.
+data/lichess_db_puzzle.csv
+data/lichess_db_puzzle.csv.zst
