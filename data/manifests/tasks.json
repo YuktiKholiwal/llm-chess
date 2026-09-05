@@ -1,0 +1,21 @@
+{
+  "stage": "tasks",
+  "finished_at": "2026-09-05T18:53:50+00:00",
+  "commit": "1a734ce-dirty",
+  "source_url": "https://database.lichess.org/lichess_db_puzzle.csv.zst",
+  "source_hash": "a0ea9129c6b6",
+  "bands": [
+    1200,
+    1600,
+    2000,
+    2400
+  ],
+  "per_band": 50,
+  "band_tolerance": 100,
+  "max_rating_deviation": 100,
+  "min_plays": 200,
+  "seed": 20260905,
+  "tasks": 200,
+  "bank_hash": "757e833dc4ea",
+  "contamination_controlled": false
+}
