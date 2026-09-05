@@ -39,6 +39,7 @@ def outcome(**overrides) -> TaskOutcome:
         cost_usd=0.01,
         retries=0,
         extraction_failed=False,
+        plan_named_move=True,
     )
     return TaskOutcome(**{**base, **overrides})
 
@@ -215,3 +216,48 @@ class TestSeparation:
 
     def test_touching_intervals_are_not_separated(self):
         assert separated((0.1, 0.3), (0.3, 0.5)) is False
+
+
+class TestPlanConfounds:
+    """Two numbers that keep the plan metrics from being read as more than they are.
+
+    Consistency compares the plan's move with the played move -- but where a
+    plan does not name a move, an inference stands in for it, and the
+    resolver's mistakes then read as the model contradicting itself. And cp
+    loss on puzzles is bimodal: a plan finds the tactic or throws the game
+    away, so a median lands in a gap where almost nothing actually falls.
+    """
+
+    def test_reports_how_often_plans_named_their_own_move(self):
+        scores = summarise(
+            [outcome(plan_named_move=True)] * 3 + [outcome(plan_named_move=False)],
+            "overall", "m", "M",
+        )
+        assert scores.plan_named_rate == pytest.approx(0.75)
+
+    def test_a_model_that_never_names_its_move_is_visible_as_such(self):
+        scores = summarise([outcome(plan_named_move=False)] * 4, "overall", "m", "M")
+        assert scores.plan_named_rate == 0.0
+
+    def test_sound_plans_are_those_within_a_pawn_of_best(self):
+        scores = summarise(
+            [
+                outcome(plan_cp_losses=(0,)),
+                outcome(plan_cp_losses=(100,)),
+                outcome(plan_cp_losses=(101,)),
+                outcome(plan_cp_losses=(9500,)),
+            ],
+            "overall", "m", "M",
+        )
+        assert scores.plan_sound_rate == pytest.approx(0.5)
+
+    def test_the_sound_rate_survives_the_bimodality_a_median_hides(self):
+        # Half the plans perfect, half catastrophic: the median lands at a
+        # value no plan is near, while the sound rate says exactly what happened.
+        bimodal = [outcome(plan_cp_losses=(0,))] * 5 + [outcome(plan_cp_losses=(9800,))] * 5
+        scores = summarise(bimodal, "overall", "m", "M")
+        assert scores.plan_sound_rate == pytest.approx(0.5)
+        assert scores.plan_cp_loss_median == pytest.approx(4900)
+
+    def test_reports_nothing_where_no_plan_was_scored(self):
+        assert summarise([outcome(plan_cp_losses=())], "overall", "m", "M").plan_sound_rate is None

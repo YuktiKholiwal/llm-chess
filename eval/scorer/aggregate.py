@@ -29,6 +29,8 @@ BOOTSTRAP_ITERATIONS = 2000
 BOOTSTRAP_SEED = 20260905
 # Below this a per-theme row is noise dressed up as a finding.
 MIN_THEME_TASKS = 10
+# Within this much of the engine's best move, a plan is sound rather than lucky.
+SOUND_PLAN_CP = 100
 
 
 @dataclass
@@ -51,6 +53,8 @@ class TaskOutcome:
     cost_usd: float
     retries: int
     extraction_failed: bool
+    """Whether the stated plan named its own move, or a model had to infer it."""
+    plan_named_move: bool
 
     @property
     def verifiable(self) -> int:
@@ -92,6 +96,8 @@ class Scores:
     played_cp_loss_median: float | None
     consistency: float | None
     plan_resolved_rate: float
+    plan_named_rate: float
+    plan_sound_rate: float | None
     illegal_rate: float
     extraction_failure_rate: float
     cost_per_task: float
@@ -220,6 +226,18 @@ def summarise(outcomes: list[TaskOutcome], scope: str, model: str, label: str) -
         played_cp_loss_median=_median(played_losses),
         consistency=_mean(1.0 if c else 0.0 for c in consistencies) if consistencies else None,
         plan_resolved_rate=len(consistencies) / n,
+        # Consistency is only comparable between models that state their plans
+        # at the same level of detail. Where a plan does not name its move, an
+        # inference stands in for it, and the resolver's mistakes then read as
+        # the model contradicting itself. This is that confound, measured.
+        plan_named_rate=_mean(1.0 if o.plan_named_move else 0.0 for o in outcomes),
+        # Cp loss on puzzles is bimodal -- find the tactic or lose everything --
+        # so a median says little. This is the share of plans that were sound.
+        plan_sound_rate=(
+            _mean(1.0 if loss <= SOUND_PLAN_CP else 0.0 for loss in plan_losses)
+            if plan_losses
+            else None
+        ),
         illegal_rate=_mean(0.0 if o.answered else 1.0 for o in outcomes),
         extraction_failure_rate=_mean(1.0 if o.extraction_failed else 0.0 for o in outcomes),
         cost_per_task=total_cost / n,

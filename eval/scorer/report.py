@@ -17,6 +17,8 @@ import argparse
 from pathlib import Path
 from typing import Any
 
+import chess
+
 from ..config import (
     CLAIMS_PATH,
     RESULTS_PATH,
@@ -27,6 +29,7 @@ from ..config import (
 )
 from ..manifest import git_commit, now, write_manifest
 from ..store import read_jsonl, write_json
+from ..verifier.handlers import move_from_text
 from .aggregate import Scores, TaskOutcome, by_band, by_theme, separated, summarise
 
 RESULTS_MD = Path("RESULTS.md")
@@ -80,6 +83,10 @@ def collect(cfg: Config) -> dict[str, list[TaskOutcome]]:
                 cost_usd=float(run.get("cost_usd") or 0.0),
                 retries=int(run.get("retries") or 0),
                 extraction_failed=key in failed_extraction,
+                plan_named_move=move_from_text(
+                    chess.Board(task["fen"]), run.get("plan") or ""
+                )
+                is not None,
             )
         )
     return outcomes
@@ -101,15 +108,15 @@ def signed_pct(value: float | None) -> str:
 
 def headline_table(scores: list[Scores]) -> str:
     lines = [
-        "| Model | Solve rate | Claim accuracy | Gap | Unverifiable | Plan cp loss | Consistency | $/task |",
-        "|---|---|---|---|---|---|---|---|",
+        "| Model | Solve rate | Claim accuracy | Gap | Unverifiable | Sound plans | Consistency | Plans naming a move | $/task |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for s in scores:
         lines.append(
             f"| {s.label} | {pct(s.solve_rate)} | {pct(s.claim_accuracy)} "
             f"| {signed_pct(s.reasoning_outcome_gap)} | {pct(s.unverifiable_rate)} "
-            f"| {num(s.plan_cp_loss_median)} | {pct(s.consistency)} "
-            f"| ${s.cost_per_task:.4f} |"
+            f"| {pct(s.plan_sound_rate)} | {pct(s.consistency)} "
+            f"| {pct(s.plan_named_rate)} | ${s.cost_per_task:.4f} |"
         )
     return "\n".join(lines)
 
@@ -224,9 +231,22 @@ Stockfish depth {cfg.engine.depth} · total spend ${total_cost:.2f}.
 {headline_table(ranked)}
 
 *Gap is solve rate minus claim accuracy, in points. Positive means a model
-picks better moves than its description of the position would justify.
-Plan cp loss is the median centipawn loss of the move each stated plan implies.
-Consistency is how often the stated plan's move is the move actually played.*
+picks better moves than its description of the position would justify; negative
+means its reasoning is sounder than its move choice.*
+
+**Read the last three columns together.** Consistency asks whether the stated
+plan's move is the move actually played — but where a plan does not name its
+move, a model has to infer one, and the resolver's mistakes then read as the
+model contradicting itself. The "plans naming a move" column is that confound,
+measured: a model at 14% is having most of its plans guessed at, and its
+consistency figure is not comparable with one at 81%.
+
+Sound plans replaces a median centipawn loss, which is the wrong summary here.
+On tactical puzzles the distribution is bimodal — a plan finds the tactic or
+throws the game away — so the median falls in a gap where almost no plan
+actually lands. Across this run, 26% of plans lost 100cp or less and 53% lost
+1000cp or more. `plan_cp_loss_median` is still in results.json for anyone who
+wants it.
 
 ## Kill check
 

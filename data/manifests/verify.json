@@ -1,0 +1,16 @@
+{
+  "stage": "verify",
+  "finished_at": "2026-09-05T21:17:04+00:00",
+  "commit": "bc2ba00-dirty",
+  "engine": "Stockfish 19",
+  "depth": 20,
+  "resolver": "anthropic/claude-haiku-4.5",
+  "resolver_hash": "3e515467fe7a",
+  "runs": 600,
+  "verdicts": {
+    "true": 861,
+    "false": 479,
+    "unverifiable": 3581
+  },
+  "cost_usd": 1.1828
+}
