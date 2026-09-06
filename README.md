@@ -144,7 +144,8 @@ not a model scoring zero.
 ### extractor
 
 Rewrites each reasoning trace as a list of atomic claims, typed `state`,
-`threat`, `plan` or `unverifiable`, with a structured form where one fits.
+`line`, `best_move` or `unverifiable`, each carrying a structured form the
+verifier can act on.
 
 Its central instruction is that it **transcribes and never judges**. An
 extractor that quietly corrects a wrong claim stops measuring the model under
@@ -155,20 +156,44 @@ without a way to say so every negative assertion would land in the unverifiable
 bucket. That loss would not be neutral: negative claims are where careless
 reasoning most often goes wrong.
 
+`unverifiable` is a judgement, not a default. A claim earns it only by
+containing no move sequence and no checkable fact about the board. Under v1 of
+the prompt it was where anything awkward ended up, and three quarters of every
+trace went unchecked as a result.
+
 ### verifier
 
-Eleven handlers over python-chess: `pinned`, `attacked`, `defended`, `hanging`,
-`material`, `check`, `mate_in`, `controls_square`, `piece_on_square`,
-`castling_rights`, `passed_pawn`. Each returns true, false, or **unverifiable**
-— a distinct third value, because scoring an unanswerable claim as false would
-blame a model for the extractor's silence.
+**State handlers**, over python-chess: `pinned`, `attacked`, `defended`,
+`hanging`, `material`, `check`, `mate_in`, `controls_square`,
+`piece_on_square`, `castling_rights`, `passed_pawn`. Each returns true, false,
+or **unverifiable** — a distinct third value, because scoring an unanswerable
+claim as false would blame a model for the extractor's silence. `mate_in` is
+the one a rules library cannot answer and defers to Stockfish.
 
-`mate_in` is the one that a rules library cannot answer and defers to Stockfish.
+**The line handler** checks a calculated variation: play the moves, then test an
+assertion about where they end up. An illegal move makes the claim false and
+the reason names which move broke — that is the most common way a model's
+calculation is wrong. Move numbers and ellipses are stripped as the notation
+they are, and alternatives (`Kf3/Ke3`) are expanded so that every branch must
+hold, since a model offering both is claiming both. Assertions cover check,
+mate, captures, material balance, forced replies, king mobility, and engine
+evaluation bounds.
 
-Plan claims are scored by the centipawn loss of the move they imply, at depth
-20. That move is read from the text where the plan names it, and only otherwise
-resolved by a model call. A plan that resolves to nothing is left unscored
-rather than assumed to be the played move.
+Lines matter more than their share of the code suggests. Triage of the first
+run found that half of everything the verifier could not check was a
+conditional variation — the most substantive thing a model says about a
+position, and all of it previously unscored.
+
+**The best_move handler** asks whether a named move is within 30cp of the
+engine's best, rather than whether it is the single top choice. Several moves
+are often equal, and a model preferring one of two equivalent winning moves has
+not made a mistake.
+
+Plans are scored once per task from the model's stated `<plan>`, by the
+centipawn loss of the move it implies at depth 20. That move is read from the
+text where the plan names it, and only otherwise resolved by a model call. A
+plan that resolves to nothing is left unscored rather than assumed to be the
+played move.
 
 This is the module the eval rests on, so it is the one with real tests: every
 handler against hand-built positions chosen to separate it from the mistake it
@@ -182,7 +207,7 @@ Per model, per model × band, per model × motif:
 | | |
 |---|---|
 | `solve_rate` | move equals the first move of the solution |
-| `claim_accuracy` | true / (true + false) |
+| `claim_accuracy` | true / (true + false), overall and split state vs line |
 | `unverifiable_rate` | share of claims nothing could check |
 | `plan_cp_loss_median` | how much the engine dislikes the plan's move |
 | `consistency` | the stated plan's move is the move played |
@@ -213,10 +238,11 @@ eval/
 ├── tasks/               download + build the puzzle bank
 ├── runner/              prompt, OpenRouter client, parser, run loop
 ├── extractor/           claim schema, extraction prompt, extract loop
-├── verifier/            handlers, Stockfish wrapper, plan resolution
+├── verifier/            state handlers, line checking, engine, plan resolution
 └── scorer/              aggregation, bootstrap intervals, report
 scripts/eval_extractor.py   recall/precision against a labelled set
-tests/                   handlers, tasks, parsing, frozen prompts, scoring
+scripts/slices.py           accuracy by claim kind, band and plan soundness
+tests/                   handlers, lines, tasks, parsing, frozen prompts, scoring
 data/                    the bank, the stage outputs, the manifests
 AUDIT.md                 what this repo was before, and what was reused
 ```
@@ -230,8 +256,10 @@ engine build that produced it.
 The runner and extractor prompts are content-hashed and their hashes are
 asserted by tests. Rewording one makes every previously published number
 incomparable, so changing the instrument fails the build rather than showing up
-later as an unexplained shift in the results. To change a prompt, add `v2`
-beside `v1` rather than editing `v1`.
+later as an unexplained shift in the results. To change a prompt, add the next
+version beside the current one rather than editing it — the extractor is on v2
+for exactly that reason, and v1's claims are kept on disk as a baseline so the
+change could be measured rather than asserted.
 
 ## Stack
 
