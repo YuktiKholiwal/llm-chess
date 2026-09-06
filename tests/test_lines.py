@@ -286,3 +286,54 @@ class TestBestMove:
         assert self._h.best_move(
             chess.Board(self.POSITION), text="the plan is to improve slowly", engine=engine
         ) is None
+
+
+class TestPrefixResolution:
+    """Which position a conditional line starts from is decided by legality.
+
+    "If Qxc4, Nxc4 wins the queen" continues from after the move the author is
+    choosing; "Rxb8+ gives check" starts from the position as given. Telling
+    those apart from the wording is exactly what an extractor gets wrong -- it
+    did so on 42% of line claims in the first full run, and every one was scored
+    false for a mistake the model never made. Where the moves play out from only
+    one of the two readings, that is the one meant.
+    """
+
+    # White to move. Qxf7+ is White's own move; Kxf7 is only available after it.
+    POSITION = "5rk1/2Q2p1p/2p1p1p1/p2p4/8/q2b4/P4PPP/2RR2K1 w - - 4 26"
+
+    def test_a_line_from_the_position_survives_a_wrong_prefix(self):
+        # Marked "played" though it starts from the position as given.
+        assert verdict(
+            self.POSITION,
+            {"prefix": "played", "moves": ["Qxf7+"],
+             "assertion": {"type": "gives_check"}},
+            played="c7f7",
+        ).value is True
+
+    def test_a_continuation_survives_a_missing_prefix(self):
+        # Marked null though it continues after the author's own Qxf7+.
+        assert verdict(
+            self.POSITION,
+            {"prefix": None, "moves": ["Kxf7"],
+             "assertion": {"type": "captures_piece", "piece": "queen"}},
+            played="c7f7",
+        ).value is True
+
+    def test_a_line_illegal_from_either_reading_is_still_false(self):
+        result = verdict(
+            self.POSITION,
+            {"prefix": "played", "moves": ["Qxa8"],
+             "assertion": {"type": "gives_check"}},
+            played="c7f7",
+        )
+        assert result.value is False
+        assert result.reason.startswith("illegal move")
+
+    def test_the_extractors_reading_breaks_a_tie(self):
+        # Rc2 is legal for White both before and after a null prefix, so the
+        # stated reading is the one used rather than an arbitrary choice.
+        assert verdict(
+            self.POSITION,
+            {"prefix": None, "moves": ["Rc2"], "assertion": {"type": "gives_check"}},
+        ).value is False

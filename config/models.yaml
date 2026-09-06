@@ -50,7 +50,9 @@ engine:
   depth: 20
   # Plan and played-move scoring only ever asks for one line.
   threads: 1
-  hash_mb: 256
+  # Modest on purpose: twelve workers share one engine, and a large hash
+  # bought nothing measurable here while adding real memory pressure.
+  hash_mb: 64
 
 limits:
   # Checked before every request; the run stops rather than overshooting.
@@ -64,7 +66,7 @@ limits:
   abort_after_consecutive_errors: 3
   # Requests in flight at once. The cost cap is checked before each is
   # submitted, so a run can overshoot it by at most this many calls.
-  concurrency: 12
+  concurrency: 8
 
 tasks:
   source_url: https://database.lichess.org/lichess_db_puzzle.csv.zst

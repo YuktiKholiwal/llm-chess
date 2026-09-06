@@ -231,37 +231,55 @@ def evaluate(
     return None
 
 
+def _with_prefix(board: chess.Board, token: str | None) -> chess.Board | None:
+    """The position after the prefix move, or None if it will not play."""
+    if not token:
+        return None
+    position = board.copy()
+    for candidate in (token, clean_san(token) or ""):
+        try:
+            position.push(chess.Move.from_uci(candidate))
+            return position
+        except ValueError:
+            try:
+                position.push_san(candidate)
+                return position
+            except (ValueError, chess.IllegalMoveError, chess.AmbiguousMoveError, chess.InvalidMoveError):
+                position = board.copy()
+    return None
+
+
+def _play_all(start: chess.Board, lines: list[list[str]]) -> tuple[bool, str, list]:
+    """Plays every branch from one starting position."""
+    results = []
+    for line in lines:
+        final, failure, moves = play(start, line)
+        if final is None:
+            return False, failure, []
+        results.append((final, moves))
+    return True, "", results
+
+
 def check_line(
     board: chess.Board,
     structured: dict,
     engine=None,
     played_move: str | None = None,
 ) -> LineVerdict:
-    """Verdict on one line claim, across every branch it offers."""
+    """Verdict on one line claim, across every branch it offers.
+
+    The starting position is decided by legality rather than by the extractor's
+    guess. A conditional line either continues from the position as given or
+    from after the move the author is choosing, and which one a sentence means
+    is exactly the kind of thing an extractor gets wrong -- measured at 42% of
+    line claims on the first full run, every one of them scored false for a
+    mistake the model did not make. Where the moves play out from only one of
+    the two, that is plainly the reading intended; the extractor's `prefix` is
+    consulted only to break a genuine tie.
+    """
     assertion = structured.get("assertion")
     if not isinstance(assertion, dict):
         return LineVerdict(None, "no assertion")
-
-    start = board.copy()
-    prefix = structured.get("prefix")
-    if prefix:
-        # "after ..." usually means after the move the model itself played.
-        token = played_move if str(prefix).lower() in ("played", "self") else str(prefix)
-        applied = False
-        for candidate in (token, clean_san(token) or ""):
-            try:
-                start.push(chess.Move.from_uci(candidate))
-                applied = True
-                break
-            except ValueError:
-                try:
-                    start.push_san(candidate)
-                    applied = True
-                    break
-                except (ValueError, chess.IllegalMoveError, chess.AmbiguousMoveError, chess.InvalidMoveError):
-                    continue
-        if not applied:
-            return LineVerdict(False, "illegal prefix move")
 
     tokens = tokenise(structured.get("moves"))
     if len(tokens) > MAX_PLIES:
@@ -271,17 +289,33 @@ def check_line(
     if not concrete:
         return LineVerdict(None, "too many branches")
 
-    verdicts: list[bool] = []
-    for line in concrete:
-        final, failure, moves = play(start, line)
-        if final is None:
-            return LineVerdict(False, failure)
-        answer = evaluate(final, start, moves, assertion, engine)
-        if answer is None:
-            return LineVerdict(None, "assertion not answerable")
-        verdicts.append(answer)
+    prefix = structured.get("prefix")
+    token = played_move if str(prefix).lower() in ("played", "self") else prefix
+    after_prefix = _with_prefix(board, token if prefix else played_move)
 
-    if not verdicts:
-        return LineVerdict(None, "no line to play")
-    # Every branch must hold: a model offering alternatives claims all of them.
-    return LineVerdict(all(verdicts), "" if all(verdicts) else "assertion fails in a branch")
+    # Preferred reading first, so a tie falls the way the extractor read it.
+    candidates = [after_prefix, board.copy()] if prefix else [board.copy(), after_prefix]
+
+    failure = "illegal move 1"
+    for start in candidates:
+        if start is None:
+            continue
+        ok, why, results = _play_all(start, concrete)
+        if not ok:
+            failure = why
+            continue
+
+        verdicts: list[bool] = []
+        for final, moves in results:
+            answer = evaluate(final, start, moves, assertion, engine)
+            if answer is None:
+                return LineVerdict(None, "assertion not answerable")
+            verdicts.append(answer)
+        if not verdicts:
+            return LineVerdict(None, "no line to play")
+        # Every branch must hold: a model offering alternatives claims all of them.
+        return LineVerdict(
+            all(verdicts), "" if all(verdicts) else "assertion fails in a branch"
+        )
+
+    return LineVerdict(False, failure)

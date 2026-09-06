@@ -19,6 +19,11 @@ import chess.engine
 
 MATE_CP = 10000
 
+# Line claims search far more distinct positions than state claims do -- every
+# ply of every branch -- so the cache is bounded rather than left to grow for
+# the length of a run.
+MAX_CACHED_POSITIONS = 50_000
+
 
 def mate_to_cp(mate: int) -> int:
     """Nearer mates score higher, and any mate outscores any material edge."""
@@ -80,6 +85,8 @@ class Engine:
         }
 
         with self._lock:
+            if len(self._cache) >= MAX_CACHED_POSITIONS:
+                self._cache.clear()
             self._cache[key] = result
         return result
 
