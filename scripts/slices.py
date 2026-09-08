@@ -48,7 +48,14 @@ def load():
 
 
 def write_triage(tasks, claims, verdicts) -> int:
-    """A seeded sample of unverifiable claims, drawn evenly across models."""
+    """A seeded sample of unverifiable claims, drawn evenly across models.
+
+    Never overwrites an existing file: the sample is hand-labelled, and a
+    rerun after re-extraction would silently replace rows someone has already
+    read and bucketed. Delete it deliberately to draw a fresh one.
+    """
+    if TRIAGE_PATH.exists():
+        return sum(1 for _ in TRIAGE_PATH.open()) - 1
     unverifiable = defaultdict(list)
     for v in verdicts:
         if v["verdict"] is None:
@@ -126,9 +133,17 @@ def main() -> None:
         band = tasks[v["task_id"]]["rating_band"]
         by_band[(band, v["model"])][index] += 1
 
+    # One plan per task, carried on every row of that run, so dedupe by run.
+    # Claim-level plan_cp_loss went away when claims became state/line/
+    # best_move/unverifiable; the stated <plan> is where a plan lives now.
     sound: dict = defaultdict(lambda: [0, 0])
-    for v in verdicts:
-        loss = v.get("plan_cp_loss")
+    seen: set[tuple[str, str]] = set()
+    for v in read_jsonl(VERIFIED_PATH):
+        key = (v["task_id"], v["model"])
+        if key in seen:
+            continue
+        seen.add(key)
+        loss = v.get("plan_move_cp_loss")
         if loss is not None:
             sound[v["model"]][0] += 1 if loss < SOUND_PLAN_CP else 0
             sound[v["model"]][1] += 1

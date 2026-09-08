@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-07T12:41:13+00:00",
-  "commit": "7877e3d-dirty",
+  "generated_at": "2026-09-08T18:47:59+00:00",
+  "commit": "040532b",
   "engine_depth": 20,
   "extractor": "anthropic/claude-haiku-4.5",
   "overall": [
@@ -99,37 +99,37 @@
       "model": "qwen/qwen3.8-2.4t-a95b",
       "label": "Qwen3.8 A95B",
       "tasks": 200,
-      "verified_tasks": 169,
+      "verified_tasks": 170,
       "solve_rate": 0.33,
       "solve_rate_ci": [
         0.27,
         0.395
       ],
-      "claim_accuracy": 0.4015215553677092,
+      "claim_accuracy": 0.4001677852348993,
       "claim_accuracy_ci": [
-        0.36258278145695366,
-        0.44153577661431065
+        0.36135812449474536,
+        0.4400330851943755
       ],
-      "reasoning_outcome_gap": -0.07152155536770921,
-      "unverifiable_rate": 0.1715686274509804,
-      "claims_true": 475,
-      "claims_false": 708,
+      "reasoning_outcome_gap": -0.0701677852348993,
+      "unverifiable_rate": 0.17049408489909534,
+      "claims_true": 477,
+      "claims_false": 715,
       "claims_unverifiable": 245,
-      "claims_per_task": 7.14,
+      "claims_per_task": 7.185,
       "state_accuracy": 0.8638132295719845,
       "state_accuracy_ci": [
         0.8,
         0.9146341463414634
       ],
       "state_claims": 257,
-      "line_accuracy": 0.2806372549019608,
+      "line_accuracy": 0.28068043742405835,
       "line_accuracy_ci": [
-        0.24133811230585425,
-        0.32186732186732187
+        0.24080664294187426,
+        0.32129514321295144
       ],
-      "line_claims": 816,
+      "line_claims": 823,
       "plan_cp_loss_median": 1161,
-      "played_cp_loss_median": 1120,
+      "played_cp_loss_median": 1131.5,
       "consistency": 0.9856115107913669,
       "plan_resolved_rate": 0.695,
       "plan_named_rate": 0.81,
@@ -461,37 +461,37 @@
       "model": "qwen/qwen3.8-2.4t-a95b",
       "label": "Qwen3.8 A95B",
       "tasks": 50,
-      "verified_tasks": 41,
+      "verified_tasks": 42,
       "solve_rate": 0.28,
       "solve_rate_ci": [
         0.16,
         0.4
       ],
-      "claim_accuracy": 0.3464052287581699,
+      "claim_accuracy": 0.34285714285714286,
       "claim_accuracy_ci": [
-        0.2717391304347826,
-        0.4228187919463087
+        0.2682926829268293,
+        0.417910447761194
       ],
-      "reasoning_outcome_gap": -0.0664052287581699,
-      "unverifiable_rate": 0.15,
-      "claims_true": 106,
-      "claims_false": 200,
+      "reasoning_outcome_gap": -0.06285714285714283,
+      "unverifiable_rate": 0.14634146341463414,
+      "claims_true": 108,
+      "claims_false": 207,
       "claims_unverifiable": 54,
-      "claims_per_task": 7.2,
+      "claims_per_task": 7.38,
       "state_accuracy": 0.8181818181818182,
       "state_accuracy_ci": [
         0.6521739130434783,
         0.9552238805970149
       ],
       "state_claims": 66,
-      "line_accuracy": 0.21904761904761905,
+      "line_accuracy": 0.22119815668202766,
       "line_accuracy_ci": [
-        0.15384615384615385,
-        0.2909090909090909
+        0.15789473684210525,
+        0.2905982905982906
       ],
-      "line_claims": 210,
+      "line_claims": 217,
       "plan_cp_loss_median": 1161,
-      "played_cp_loss_median": 1161,
+      "played_cp_loss_median": 1233.0,
       "consistency": 1.0,
       "plan_resolved_rate": 0.7,
       "plan_named_rate": 0.78,
@@ -1138,37 +1138,37 @@
       "model": "qwen/qwen3.8-2.4t-a95b",
       "label": "Qwen3.8 A95B",
       "tasks": 96,
-      "verified_tasks": 77,
+      "verified_tasks": 78,
       "solve_rate": 0.3333333333333333,
       "solve_rate_ci": [
         0.23958333333333334,
         0.4375
       ],
-      "claim_accuracy": 0.37707948243992606,
+      "claim_accuracy": 0.37454545454545457,
       "claim_accuracy_ci": [
-        0.3247706422018349,
-        0.4308231173380035
+        0.32,
+        0.4278169014084507
       ],
-      "reasoning_outcome_gap": -0.04374614910659275,
-      "unverifiable_rate": 0.17530487804878048,
-      "claims_true": 204,
-      "claims_false": 337,
+      "reasoning_outcome_gap": -0.041212121212121255,
+      "unverifiable_rate": 0.17293233082706766,
+      "claims_true": 206,
+      "claims_false": 344,
       "claims_unverifiable": 115,
-      "claims_per_task": 6.833333333333333,
+      "claims_per_task": 6.927083333333333,
       "state_accuracy": 0.8203125,
       "state_accuracy_ci": [
         0.7121212121212122,
         0.9152542372881356
       ],
       "state_claims": 128,
-      "line_accuracy": 0.23822714681440443,
+      "line_accuracy": 0.2391304347826087,
       "line_accuracy_ci": [
-        0.1813186813186813,
-        0.2947976878612717
+        0.18333333333333332,
+        0.2978142076502732
       ],
-      "line_claims": 361,
+      "line_claims": 368,
       "plan_cp_loss_median": 1052,
-      "played_cp_loss_median": 1161,
+      "played_cp_loss_median": 1172.5,
       "consistency": 0.9692307692307692,
       "plan_resolved_rate": 0.6770833333333334,
       "plan_named_rate": 0.84375,
@@ -1543,37 +1543,37 @@
       "model": "qwen/qwen3.8-2.4t-a95b",
       "label": "Qwen3.8 A95B",
       "tasks": 109,
-      "verified_tasks": 92,
+      "verified_tasks": 93,
       "solve_rate": 0.3577981651376147,
       "solve_rate_ci": [
         0.26605504587155965,
         0.44954128440366975
       ],
-      "claim_accuracy": 0.3990306946688207,
+      "claim_accuracy": 0.3964968152866242,
       "claim_accuracy_ci": [
-        0.34548335974643424,
-        0.44947735191637633
+        0.3459715639810427,
+        0.4473257698541329
       ],
-      "reasoning_outcome_gap": -0.041232529531205986,
-      "unverifiable_rate": 0.16238159675236807,
-      "claims_true": 247,
-      "claims_false": 372,
+      "reasoning_outcome_gap": -0.03869865014900953,
+      "unverifiable_rate": 0.16042780748663102,
+      "claims_true": 249,
+      "claims_false": 379,
       "claims_unverifiable": 120,
-      "claims_per_task": 6.779816513761468,
+      "claims_per_task": 6.862385321100917,
       "state_accuracy": 0.8992248062015504,
       "state_accuracy_ci": [
         0.8367346938775511,
         0.9552238805970149
       ],
       "state_claims": 129,
-      "line_accuracy": 0.2716627634660422,
+      "line_accuracy": 0.271889400921659,
       "line_accuracy_ci": [
-        0.22477064220183487,
-        0.32084309133489464
+        0.22572815533980584,
+        0.3195121951219512
       ],
-      "line_claims": 427,
+      "line_claims": 434,
       "plan_cp_loss_median": 1084,
-      "played_cp_loss_median": 1067.0,
+      "played_cp_loss_median": 1082,
       "consistency": 1.0,
       "plan_resolved_rate": 0.7064220183486238,
       "plan_named_rate": 0.8348623853211009,
@@ -2083,37 +2083,37 @@
       "model": "qwen/qwen3.8-2.4t-a95b",
       "label": "Qwen3.8 A95B",
       "tasks": 84,
-      "verified_tasks": 68,
+      "verified_tasks": 69,
       "solve_rate": 0.32142857142857145,
       "solve_rate_ci": [
         0.2261904761904762,
         0.42857142857142855
       ],
-      "claim_accuracy": 0.41869158878504675,
+      "claim_accuracy": 0.41544117647058826,
       "claim_accuracy_ci": [
-        0.3656716417910448,
-        0.4752136752136752
+        0.3648148148148148,
+        0.46923076923076923
       ],
-      "reasoning_outcome_gap": -0.0972630173564753,
-      "unverifiable_rate": 0.15213946117274169,
-      "claims_true": 224,
-      "claims_false": 311,
+      "reasoning_outcome_gap": -0.0940126050420168,
+      "unverifiable_rate": 0.15,
+      "claims_true": 226,
+      "claims_false": 318,
       "claims_unverifiable": 96,
-      "claims_per_task": 7.511904761904762,
+      "claims_per_task": 7.619047619047619,
       "state_accuracy": 0.9112903225806451,
       "state_accuracy_ci": [
         0.8468468468468469,
         0.9605263157894737
       ],
       "state_claims": 124,
-      "line_accuracy": 0.27671232876712326,
+      "line_accuracy": 0.2768817204301075,
       "line_accuracy_ci": [
-        0.21891891891891893,
-        0.335149863760218
+        0.2205128205128205,
+        0.3333333333333333
       ],
-      "line_claims": 365,
+      "line_claims": 372,
       "plan_cp_loss_median": 1053.0,
-      "played_cp_loss_median": 1091.5,
+      "played_cp_loss_median": 1099,
       "consistency": 0.9814814814814815,
       "plan_resolved_rate": 0.6428571428571429,
       "plan_named_rate": 0.7857142857142857,
