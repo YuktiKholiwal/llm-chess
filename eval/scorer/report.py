@@ -89,6 +89,7 @@ def collect(cfg: Config) -> dict[str, list[TaskOutcome]]:
                 cost_usd=float(run.get("cost_usd") or 0.0),
                 retries=int(run.get("retries") or 0),
                 extraction_failed=key in failed_extraction,
+                verified=bool(rows),
                 plan_named_move=move_from_text(
                     chess.Board(task["fen"]), run.get("plan") or ""
                 )
@@ -139,9 +140,10 @@ def evidence_table(scores: list[Scores]) -> str:
             else "—"
         )
         solve_ci = f"[{pct(s.solve_rate_ci[0])}, {pct(s.solve_rate_ci[1])}]"
+        coverage = "" if s.verified_tasks == s.tasks else f" ({s.verified_tasks}/{s.tasks} verified)"
         lines.append(
-            f"| {s.label} | {s.claims_per_task:.1f} | {s.claims_true} | {s.claims_false} "
-            f"| {s.claims_unverifiable} | {ci} | {solve_ci} |"
+            f"| {s.label}{coverage} | {s.claims_per_task:.1f} | {s.claims_true} "
+            f"| {s.claims_false} | {s.claims_unverifiable} | {ci} | {solve_ci} |"
         )
     return "\n".join(lines)
 

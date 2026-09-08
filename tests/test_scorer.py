@@ -43,6 +43,7 @@ def outcome(**overrides) -> TaskOutcome:
         cost_usd=0.01,
         retries=0,
         extraction_failed=False,
+        verified=True,
         plan_named_move=True,
     )
     return TaskOutcome(**{**base, **overrides})

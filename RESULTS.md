@@ -6,16 +6,16 @@ The number this eval exists to produce is the **gap** between how often a model
 picks the right move and how often the things it says about the position are
 true.
 
-Run 2026-09-05T21:19:28+00:00 at commit `bc2ba00-dirty` · 200 puzzles per model ·
+Run 2026-09-07T12:41:13+00:00 at commit `7877e3d-dirty` · 200 puzzles per model ·
 Stockfish depth 20 · total spend $24.38.
 
 ## Headline
 
 | Model | Solve rate | Claim accuracy | Gap | Unverifiable | Sound plans | Consistency | Plans naming a move | $/task |
 |---|---|---|---|---|---|---|---|---|
-| GPT-5.2 | 57.0% | 65.9% | -8.9 | 75.7% | 34.0% | 50.0% | 14.0% | $0.0575 |
-| Qwen3.8 A95B | 33.0% | 62.2% | -29.2 | 70.8% | 24.5% | 98.4% | 81.0% | $0.0274 |
-| Claude Sonnet 5 | 26.5% | 66.1% | -39.6 | 72.1% | 17.3% | 86.0% | 35.0% | $0.0370 |
+| GPT-5.2 | 57.0% | 57.8% | -0.8 | 20.9% | 42.9% | 42.9% | 14.0% | $0.0575 |
+| Qwen3.8 A95B | 33.0% | 40.2% | -7.2 | 17.2% | 31.7% | 98.6% | 81.0% | $0.0274 |
+| Claude Sonnet 5 | 26.5% | 51.8% | -25.3 | 26.5% | 31.4% | 92.9% | 35.0% | $0.0370 |
 
 *Gap is solve rate minus claim accuracy, in points. Positive means a model
 picks better moves than its description of the position would justify; negative
@@ -37,15 +37,15 @@ wants it.
 
 ## Kill check
 
-Claim accuracy spans **3.8 points**, from 62.2% (Qwen3.8 A95B) to 66.1% (Claude Sonnet 5). **That is within the 5-point kill-check threshold. The eval is not discriminative yet and needs rethinking before anything is added to it.** Confidence intervals still overlap for Claude Sonnet 5 and GPT-5.2; Claude Sonnet 5 and Qwen3.8 A95B; GPT-5.2 and Qwen3.8 A95B — the data does not separate those pairs, whatever the point estimates suggest.
+Claim accuracy spans **17.7 points**, from 40.2% (Qwen3.8 A95B) to 57.8% (GPT-5.2). That clears the 5-point kill-check threshold. Confidence intervals still overlap for GPT-5.2 and Claude Sonnet 5 — the data does not separate those pairs, whatever the point estimates suggest.
 
 ## How much evidence is behind each number
 
 | Model | Claims/task | True | False | Unverifiable | Claim accuracy 95% CI | Solve rate 95% CI |
 |---|---|---|---|---|---|---|
-| GPT-5.2 | 8.1 | 259 | 134 | 1227 | [61.5%, 70.6%] | [50.0%, 64.0%] |
-| Qwen3.8 A95B | 10.6 | 384 | 233 | 1497 | [57.5%, 67.1%] | [27.0%, 39.5%] |
-| Claude Sonnet 5 | 5.9 | 218 | 112 | 852 | [60.4%, 71.7%] | [20.5%, 32.5%] |
+| GPT-5.2 | 6.6 | 601 | 438 | 275 | [54.2%, 61.5%] | [50.0%, 64.0%] |
+| Qwen3.8 A95B (169/200 verified) | 7.1 | 475 | 708 | 245 | [36.3%, 44.2%] | [27.0%, 39.5%] |
+| Claude Sonnet 5 | 5.0 | 384 | 358 | 268 | [47.4%, 55.9%] | [20.5%, 32.5%] |
 
 Claim accuracy is true / (true + false); unverifiable claims are excluded from
 it and reported separately. This is worth reading carefully, because the metric
@@ -59,87 +59,118 @@ correlated — a model that misreads a position is usually wrong about it severa
 times over — and resampling claims independently would report an interval far
 narrower than the evidence supports.
 
+## State claims against line claims
+
+A state claim is a fact about the position as it stands ("the knight on f6 is
+pinned"). A line claim is a calculated variation ("if Qxc4, Nxc4 wins the queen
+for a rook"). They are different abilities, and a single accuracy figure hides
+which one a model actually has.
+
+| Model | Overall | State claims | Line claims |
+|---|---|---|---|
+| GPT-5.2 | 57.8% (n=1039) | 67.3% (n=251) | 55.9% (n=655) |
+| Qwen3.8 A95B | 40.2% (n=1183) | 86.4% (n=257) | 28.1% (n=816) |
+| Claude Sonnet 5 | 51.8% (n=742) | 74.8% (n=262) | 40.4% (n=438) |
+
+Line-claim accuracy spans 27.8 points (28.1% Qwen3.8 A95B to 55.9% GPT-5.2) and **separates the three models** — the spread clears 5 points and no intervals overlap.
+
+State-claim accuracy spans 19.1 points (67.3% GPT-5.2 to 86.4% Qwen3.8 A95B) and **does not separate the three models** — intervals overlap for Qwen3.8 A95B/Claude Sonnet 5, Claude Sonnet 5/GPT-5.2.
+
+## Extraction before and after
+
+| Model | Unverifiable v1 | Unverifiable v2 | Claim accuracy v1 | Claim accuracy v2 |
+|---|---|---|---|---|
+| GPT-5.2 | 75.7% | 20.9% | 65.9% | 57.8% |
+| Qwen3.8 A95B | 70.8% | 17.2% | 62.2% | 40.2% |
+| Claude Sonnet 5 | 72.1% | 26.5% | 66.1% | 51.8% |
+
+v1 of the extractor left roughly three quarters of claims unstructured, so
+almost everything a model calculated went unchecked. v2 requires a structured
+form for every claim and adds a `line` type for conditional variations. The
+claims are the same reasoning traces in both rows — only the extraction and
+verification changed.
+
 ## By rating band
 
 | Band | Model | n | Solve rate | Claim accuracy | Gap |
 |---|---|---|---|---|---|
-| 1200 | GPT-5.2 | 50 | 84.0% | 66.0% | +18.0 |
-| 1200 | Qwen3.8 A95B | 50 | 44.0% | 64.5% | -20.5 |
-| 1200 | Claude Sonnet 5 | 50 | 26.0% | 72.3% | -46.3 |
-| 1600 | GPT-5.2 | 50 | 52.0% | 67.0% | -15.0 |
-| 1600 | Claude Sonnet 5 | 50 | 28.0% | 58.2% | -30.2 |
-| 1600 | Qwen3.8 A95B | 50 | 28.0% | 64.5% | -36.5 |
-| 2000 | GPT-5.2 | 50 | 52.0% | 69.0% | -17.0 |
-| 2000 | Qwen3.8 A95B | 50 | 28.0% | 65.8% | -37.8 |
-| 2000 | Claude Sonnet 5 | 50 | 24.0% | 68.6% | -44.6 |
-| 2400 | GPT-5.2 | 50 | 40.0% | 62.1% | -22.1 |
-| 2400 | Qwen3.8 A95B | 50 | 32.0% | 55.1% | -23.1 |
-| 2400 | Claude Sonnet 5 | 50 | 28.0% | 67.1% | -39.1 |
+| 1200 | GPT-5.2 | 50 | 84.0% | 68.2% | +15.8 |
+| 1200 | Qwen3.8 A95B | 50 | 44.0% | 39.7% | +4.3 |
+| 1200 | Claude Sonnet 5 | 50 | 26.0% | 55.8% | -29.8 |
+| 1600 | GPT-5.2 | 50 | 52.0% | 55.3% | -3.3 |
+| 1600 | Claude Sonnet 5 | 50 | 28.0% | 53.2% | -25.2 |
+| 1600 | Qwen3.8 A95B | 50 | 28.0% | 50.0% | -22.0 |
+| 2000 | GPT-5.2 | 50 | 52.0% | 53.4% | -1.4 |
+| 2000 | Qwen3.8 A95B | 50 | 28.0% | 34.6% | -6.6 |
+| 2000 | Claude Sonnet 5 | 50 | 24.0% | 48.0% | -24.0 |
+| 2400 | GPT-5.2 | 50 | 40.0% | 53.5% | -13.5 |
+| 2400 | Qwen3.8 A95B | 50 | 32.0% | 36.9% | -4.9 |
+| 2400 | Claude Sonnet 5 | 50 | 28.0% | 50.0% | -22.0 |
 
 ## By motif
 
 | Theme | Model | n | Solve rate | Claim accuracy | Gap |
 |---|---|---|---|---|---|
-| advancedPawn | GPT-5.2 | 20 | 85.0% | 52.2% | +32.8 |
-| advancedPawn | Qwen3.8 A95B | 20 | 70.0% | 79.6% | -9.6 |
-| advancedPawn | Claude Sonnet 5 | 20 | 45.0% | 66.7% | -21.7 |
-| advantage | GPT-5.2 | 70 | 52.9% | 63.5% | -10.6 |
-| advantage | Qwen3.8 A95B | 70 | 28.6% | 64.7% | -36.2 |
-| advantage | Claude Sonnet 5 | 70 | 27.1% | 74.1% | -46.9 |
-| attraction | GPT-5.2 | 15 | 60.0% | 55.6% | +4.4 |
-| attraction | Qwen3.8 A95B | 15 | 46.7% | 76.0% | -29.3 |
-| attraction | Claude Sonnet 5 | 15 | 20.0% | 62.5% | -42.5 |
-| crushing | GPT-5.2 | 96 | 53.1% | 67.1% | -14.0 |
-| crushing | Qwen3.8 A95B | 96 | 33.3% | 57.0% | -23.6 |
-| crushing | Claude Sonnet 5 | 96 | 29.2% | 63.3% | -34.2 |
-| defensiveMove | GPT-5.2 | 20 | 55.0% | 64.7% | -9.7 |
-| defensiveMove | Qwen3.8 A95B | 20 | 40.0% | 69.8% | -29.8 |
-| defensiveMove | Claude Sonnet 5 | 20 | 15.0% | 65.4% | -50.4 |
-| deflection | GPT-5.2 | 13 | 61.5% | 63.3% | -1.8 |
-| deflection | Qwen3.8 A95B | 13 | 46.2% | 54.8% | -8.6 |
-| deflection | Claude Sonnet 5 | 13 | 30.8% | 61.9% | -31.1 |
-| endgame | GPT-5.2 | 109 | 58.7% | 66.2% | -7.5 |
-| endgame | Qwen3.8 A95B | 109 | 35.8% | 63.4% | -27.7 |
-| endgame | Claude Sonnet 5 | 109 | 30.3% | 68.1% | -37.9 |
-| exposedKing | GPT-5.2 | 12 | 41.7% | 81.2% | -39.6 |
-| exposedKing | Qwen3.8 A95B | 12 | 41.7% | 60.9% | -19.2 |
-| exposedKing | Claude Sonnet 5 | 12 | 16.7% | 60.0% | -43.3 |
-| fork | GPT-5.2 | 26 | 46.2% | 67.5% | -21.3 |
-| fork | Claude Sonnet 5 | 26 | 19.2% | 65.9% | -46.7 |
-| fork | Qwen3.8 A95B | 26 | 19.2% | 57.1% | -37.9 |
-| kingsideAttack | GPT-5.2 | 13 | 69.2% | 57.1% | +12.1 |
-| kingsideAttack | Qwen3.8 A95B | 13 | 53.8% | 58.1% | -4.2 |
-| kingsideAttack | Claude Sonnet 5 | 13 | 23.1% | 58.3% | -35.3 |
-| long | GPT-5.2 | 84 | 42.9% | 62.5% | -19.6 |
-| long | Qwen3.8 A95B | 84 | 32.1% | 57.8% | -25.7 |
-| long | Claude Sonnet 5 | 84 | 22.6% | 69.9% | -47.2 |
-| master | GPT-5.2 | 27 | 59.3% | 67.3% | -8.1 |
-| master | Qwen3.8 A95B | 27 | 37.0% | 59.7% | -22.7 |
-| master | Claude Sonnet 5 | 27 | 25.9% | 64.3% | -38.4 |
-| mate | GPT-5.2 | 33 | 78.8% | 66.2% | +12.6 |
-| mate | Qwen3.8 A95B | 33 | 42.4% | 67.5% | -25.1 |
-| mate | Claude Sonnet 5 | 33 | 15.2% | 59.2% | -44.0 |
-| mateIn2 | GPT-5.2 | 18 | 94.4% | 64.8% | +29.7 |
-| mateIn2 | Qwen3.8 A95B | 18 | 33.3% | 61.4% | -28.1 |
-| mateIn2 | Claude Sonnet 5 | 18 | 11.1% | 53.8% | -42.7 |
-| middlegame | GPT-5.2 | 82 | 53.7% | 65.0% | -11.3 |
-| middlegame | Qwen3.8 A95B | 82 | 30.5% | 59.8% | -29.3 |
-| middlegame | Claude Sonnet 5 | 82 | 23.2% | 65.4% | -42.2 |
-| pawnEndgame | GPT-5.2 | 15 | 60.0% | 68.2% | -8.2 |
-| pawnEndgame | Qwen3.8 A95B | 15 | 40.0% | 86.4% | -46.4 |
-| pawnEndgame | Claude Sonnet 5 | 15 | 26.7% | 50.0% | -23.3 |
-| pin | GPT-5.2 | 13 | 30.8% | 70.0% | -39.2 |
-| pin | Qwen3.8 A95B | 13 | 30.8% | 51.4% | -20.6 |
-| pin | Claude Sonnet 5 | 13 | 15.4% | 65.4% | -50.0 |
-| sacrifice | GPT-5.2 | 23 | 60.9% | 55.3% | +5.6 |
-| sacrifice | Qwen3.8 A95B | 23 | 30.4% | 66.3% | -35.8 |
-| sacrifice | Claude Sonnet 5 | 23 | 8.7% | 66.7% | -58.0 |
-| short | GPT-5.2 | 85 | 67.1% | 67.2% | -0.1 |
-| short | Claude Sonnet 5 | 85 | 28.2% | 61.5% | -33.3 |
-| short | Qwen3.8 A95B | 85 | 28.2% | 59.1% | -30.9 |
-| veryLong | GPT-5.2 | 25 | 64.0% | 63.6% | +0.4 |
-| veryLong | Qwen3.8 A95B | 25 | 52.0% | 74.4% | -22.4 |
-| veryLong | Claude Sonnet 5 | 25 | 32.0% | 67.7% | -35.7 |
+| advancedPawn | GPT-5.2 | 20 | 85.0% | 55.8% | +29.2 |
+| advancedPawn | Qwen3.8 A95B | 20 | 70.0% | 48.2% | +21.8 |
+| advancedPawn | Claude Sonnet 5 | 20 | 45.0% | 53.5% | -8.5 |
+| advantage | GPT-5.2 | 70 | 52.9% | 53.3% | -0.4 |
+| advantage | Qwen3.8 A95B | 70 | 28.6% | 42.7% | -14.1 |
+| advantage | Claude Sonnet 5 | 70 | 27.1% | 52.6% | -25.4 |
+| attraction | GPT-5.2 | 15 | 60.0% | 56.1% | +3.9 |
+| attraction | Qwen3.8 A95B | 15 | 46.7% | 46.5% | +0.2 |
+| attraction | Claude Sonnet 5 | 15 | 20.0% | 36.8% | -16.8 |
+| crushing | GPT-5.2 | 96 | 53.1% | 55.4% | -2.3 |
+| crushing | Qwen3.8 A95B | 96 | 33.3% | 37.7% | -4.4 |
+| crushing | Claude Sonnet 5 | 96 | 29.2% | 51.6% | -22.5 |
+| defensiveMove | GPT-5.2 | 20 | 55.0% | 51.5% | +3.5 |
+| defensiveMove | Qwen3.8 A95B | 20 | 40.0% | 40.0% | +0.0 |
+| defensiveMove | Claude Sonnet 5 | 20 | 15.0% | 47.4% | -32.4 |
+| deflection | GPT-5.2 | 13 | 61.5% | 52.1% | +9.5 |
+| deflection | Qwen3.8 A95B | 13 | 46.2% | 35.7% | +10.4 |
+| deflection | Claude Sonnet 5 | 13 | 30.8% | 30.8% | +0.0 |
+| endgame | GPT-5.2 | 109 | 58.7% | 57.6% | +1.1 |
+| endgame | Qwen3.8 A95B | 109 | 35.8% | 39.9% | -4.1 |
+| endgame | Claude Sonnet 5 | 109 | 30.3% | 50.1% | -19.9 |
+| exposedKing | GPT-5.2 | 12 | 41.7% | 58.3% | -16.7 |
+| exposedKing | Qwen3.8 A95B | 12 | 41.7% | 37.8% | +3.8 |
+| exposedKing | Claude Sonnet 5 | 12 | 16.7% | 53.2% | -36.5 |
+| fork | GPT-5.2 | 26 | 46.2% | 49.2% | -3.0 |
+| fork | Claude Sonnet 5 | 26 | 19.2% | 50.0% | -30.8 |
+| fork | Qwen3.8 A95B | 26 | 19.2% | 33.1% | -13.9 |
+| kingsideAttack | GPT-5.2 | 13 | 69.2% | 66.7% | +2.6 |
+| kingsideAttack | Qwen3.8 A95B | 13 | 53.8% | 44.9% | +8.9 |
+| kingsideAttack | Claude Sonnet 5 | 13 | 23.1% | 47.4% | -24.3 |
+| long | GPT-5.2 | 84 | 42.9% | 54.1% | -11.3 |
+| long | Qwen3.8 A95B | 84 | 32.1% | 41.9% | -9.7 |
+| long | Claude Sonnet 5 | 84 | 22.6% | 52.2% | -29.6 |
+| master | GPT-5.2 | 27 | 59.3% | 52.2% | +7.1 |
+| master | Qwen3.8 A95B | 27 | 37.0% | 29.1% | +8.0 |
+| master | Claude Sonnet 5 | 27 | 25.9% | 52.9% | -27.0 |
+| mate | GPT-5.2 | 33 | 78.8% | 73.7% | +5.1 |
+| mate | Qwen3.8 A95B | 33 | 42.4% | 41.6% | +0.8 |
+| mate | Claude Sonnet 5 | 33 | 15.2% | 51.1% | -36.0 |
+| mateIn2 | GPT-5.2 | 18 | 94.4% | 79.6% | +14.8 |
+| mateIn2 | Qwen3.8 A95B | 18 | 33.3% | 35.2% | -1.9 |
+| mateIn2 | Claude Sonnet 5 | 18 | 11.1% | 48.6% | -37.5 |
+| middlegame | GPT-5.2 | 82 | 53.7% | 57.0% | -3.3 |
+| middlegame | Qwen3.8 A95B | 82 | 30.5% | 39.1% | -8.6 |
+| middlegame | Claude Sonnet 5 | 82 | 23.2% | 54.3% | -31.1 |
+| pawnEndgame | GPT-5.2 | 15 | 60.0% | 58.0% | +2.0 |
+| pawnEndgame | Qwen3.8 A95B | 15 | 40.0% | 42.6% | -2.6 |
+| pawnEndgame | Claude Sonnet 5 | 15 | 26.7% | 40.0% | -13.3 |
+| pin | GPT-5.2 | 13 | 30.8% | 56.5% | -25.7 |
+| pin | Qwen3.8 A95B | 13 | 30.8% | 35.5% | -4.7 |
+| pin | Claude Sonnet 5 | 13 | 15.4% | 53.5% | -38.1 |
+| sacrifice | GPT-5.2 | 23 | 60.9% | 48.7% | +12.2 |
+| sacrifice | Qwen3.8 A95B | 23 | 30.4% | 51.7% | -21.3 |
+| sacrifice | Claude Sonnet 5 | 23 | 8.7% | 43.4% | -34.7 |
+| short | GPT-5.2 | 85 | 67.1% | 61.2% | +5.8 |
+| short | Claude Sonnet 5 | 85 | 28.2% | 53.0% | -24.8 |
+| short | Qwen3.8 A95B | 85 | 28.2% | 36.5% | -8.3 |
+| veryLong | GPT-5.2 | 25 | 64.0% | 52.7% | +11.3 |
+| veryLong | Qwen3.8 A95B | 25 | 52.0% | 43.7% | +8.3 |
+| veryLong | Claude Sonnet 5 | 25 | 32.0% | 45.1% | -13.1 |
 
 Only motifs appearing in at least 10 tasks are shown; below that a row is noise
 dressed up as a finding.

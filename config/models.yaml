@@ -66,7 +66,7 @@ limits:
   abort_after_consecutive_errors: 3
   # Requests in flight at once. The cost cap is checked before each is
   # submitted, so a run can overshoot it by at most this many calls.
-  concurrency: 2
+  concurrency: 1
 
 tasks:
   source_url: https://database.lichess.org/lichess_db_puzzle.csv.zst

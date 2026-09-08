@@ -60,6 +60,9 @@ class TaskOutcome:
     cost_usd: float
     retries: int
     extraction_failed: bool
+    """False when the verifier never reached this run, so its claims are absent
+    rather than empty. The two must not be confused in a denominator."""
+    verified: bool
     """Whether the stated plan named its own move, or a model had to infer it."""
     plan_named_move: bool
 
@@ -89,6 +92,7 @@ class Scores:
     model: str
     label: str
     tasks: int
+    verified_tasks: int
     solve_rate: float
     solve_rate_ci: tuple[float, float]
     claim_accuracy: float | None
@@ -234,6 +238,7 @@ def summarise(outcomes: list[TaskOutcome], scope: str, model: str, label: str) -
         model=model,
         label=label,
         tasks=n,
+        verified_tasks=sum(1 for o in outcomes if o.verified),
         solve_rate=solve_rate,
         solve_rate_ci=bootstrap_ci(solved),
         claim_accuracy=claim_accuracy,
