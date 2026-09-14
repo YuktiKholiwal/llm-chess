@@ -1,0 +1,171 @@
+{
+  "runId": "2026-09-03T18-47-32-198Z",
+  "publishedAt": "2026-09-03T19:28:39.405Z",
+  "set": {
+    "id": "core-v1",
+    "hash": "0e1484c4",
+    "positions": 30
+  },
+  "prompt": {
+    "version": "v1-neutral",
+    "hash": "12750a8b"
+  },
+  "mode": "assisted",
+  "gradingEngine": "Stockfish 18 Lite WASM",
+  "gradingDepth": 14,
+  "entries": [
+    {
+      "modelId": "anthropic/claude-haiku-4.5",
+      "label": "Claude Haiku 4.5",
+      "vendor": "anthropic",
+      "n": 30,
+      "accuracy": 57.1,
+      "accuracyCI": [
+        44.32,
+        70.08
+      ],
+      "acpl": 269,
+      "top1Rate": 26.7,
+      "topKRate": 43.3,
+      "blunderRate": 43.3,
+      "failureRate": 0,
+      "evalErrorPawns": 5.52,
+      "evalCompliance": 100,
+      "illegalPerPosition": 0.03,
+      "totalTokens": 55006,
+      "totalCost": 0.191662,
+      "costPerPosition": 0.006389,
+      "avgLatencyMs": 10944,
+      "byCategory": [
+        {
+          "category": "tactical",
+          "n": 15,
+          "accuracy": 46.6,
+          "acpl": 380,
+          "top1Rate": 33.3,
+          "topKRate": 46.7,
+          "blunderRate": 60,
+          "failureRate": 0,
+          "evalErrorPawns": 4.42,
+          "evalCompliance": 100,
+          "illegalPerPosition": 0.07
+        },
+        {
+          "category": "positional",
+          "n": 15,
+          "accuracy": 67.7,
+          "acpl": 158,
+          "top1Rate": 20,
+          "topKRate": 40,
+          "blunderRate": 26.7,
+          "failureRate": 0,
+          "evalErrorPawns": 6.63,
+          "evalCompliance": 100,
+          "illegalPerPosition": 0
+        }
+      ]
+    },
+    {
+      "modelId": "google/gemini-3.7-flash",
+      "label": "Gemini 3.7 Flash",
+      "vendor": "google",
+      "n": 30,
+      "accuracy": 81.5,
+      "accuracyCI": [
+        70.8,
+        90.19
+      ],
+      "acpl": 92,
+      "top1Rate": 46.7,
+      "topKRate": 76.7,
+      "blunderRate": 16.7,
+      "failureRate": 0,
+      "evalErrorPawns": 4.26,
+      "evalCompliance": 100,
+      "illegalPerPosition": 0,
+      "totalTokens": 31188,
+      "totalCost": 0.067938,
+      "costPerPosition": 0.002265,
+      "avgLatencyMs": 8746,
+      "byCategory": [
+        {
+          "category": "tactical",
+          "n": 15,
+          "accuracy": 89.9,
+          "acpl": 55,
+          "top1Rate": 86.7,
+          "topKRate": 93.3,
+          "blunderRate": 6.7,
+          "failureRate": 0,
+          "evalErrorPawns": 5.38,
+          "evalCompliance": 100,
+          "illegalPerPosition": 0
+        },
+        {
+          "category": "positional",
+          "n": 15,
+          "accuracy": 73.1,
+          "acpl": 129,
+          "top1Rate": 6.7,
+          "topKRate": 60,
+          "blunderRate": 26.7,
+          "failureRate": 0,
+          "evalErrorPawns": 3.14,
+          "evalCompliance": 100,
+          "illegalPerPosition": 0
+        }
+      ]
+    },
+    {
+      "modelId": "openai/gpt-5-nano",
+      "label": "GPT-5 nano",
+      "vendor": "openai",
+      "n": 30,
+      "accuracy": 71,
+      "accuracyCI": [
+        58.25,
+        82.32
+      ],
+      "acpl": 181,
+      "top1Rate": 40,
+      "topKRate": 60,
+      "blunderRate": 26.7,
+      "failureRate": 0,
+      "evalErrorPawns": 3.28,
+      "evalCompliance": 86.7,
+      "illegalPerPosition": 0.03,
+      "totalTokens": 81799,
+      "totalCost": 0.026777,
+      "costPerPosition": 0.000893,
+      "avgLatencyMs": 62436,
+      "byCategory": [
+        {
+          "category": "tactical",
+          "n": 15,
+          "accuracy": 76.8,
+          "acpl": 177,
+          "top1Rate": 66.7,
+          "topKRate": 73.3,
+          "blunderRate": 26.7,
+          "failureRate": 0,
+          "evalErrorPawns": 4.18,
+          "evalCompliance": 73.3,
+          "illegalPerPosition": 0.07
+        },
+        {
+          "category": "positional",
+          "n": 15,
+          "accuracy": 65.2,
+          "acpl": 184,
+          "top1Rate": 13.3,
+          "topKRate": 46.7,
+          "blunderRate": 26.7,
+          "failureRate": 0,
+          "evalErrorPawns": 2.62,
+          "evalCompliance": 100,
+          "illegalPerPosition": 0
+        }
+      ]
+    }
+  ]
+}

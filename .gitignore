@@ -1,12 +1,37 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# --- Node / Next.js (the web app) ---
+/node_modules
+/.pnp
+.pnp.*
+/coverage
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.vercel
+
+# Copied out of the stockfish package by a postinstall script.
+public/stockfish/
+
+# --- Python (the reasoning-eval pipeline) ---
 .venv/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# --- Shared ---
 .DS_Store
+*.pem
 
 # Secrets. The template belongs in the repo; the filled-in file does not.
 .env*
 !.env.example
+
+# Arena benchmark run outputs. Published results live in bench/results/.
+runs/
 
 # ~300MB, and reproducible from a URL. The task bank built from it is committed
 # instead, since that is the part a score depends on.
