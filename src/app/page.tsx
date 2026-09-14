@@ -1,170 +1,182 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
 import Link from "next/link";
-import { LeaderboardClient } from "@/components/LeaderboardClient";
+import { PageShell } from "@/components/PageShell";
 import { ArrowRightIcon } from "@/components/ui";
-import {
-  buildLeaderboards,
-  overlaps,
-  type LeaderboardView,
-  type PublishedRun,
-} from "@/bench/leaderboard";
+import { buildLeaderboards } from "@/bench/leaderboard";
+import { loadPublishedRuns } from "@/bench/published";
+import { loadResults, loadTraces } from "@/reasoning/data";
 
 export const metadata = {
-  title: "LLM Chess Arena",
+  title: "Chess evals",
   description:
-    "How well language models actually play chess. Every model answers the same positions and Stockfish grades every move — contamination-free, reproducible, with confidence intervals.",
+    "Two evals for language models, played out over a chessboard. One grades the moves they make; the other checks whether what they say about the position is true.",
 };
 
-const RESULTS_DIR = "bench/results";
-
-/** Published runs are committed to the repo, so the board builds statically. */
-function loadRuns(): PublishedRun[] {
-  if (!existsSync(RESULTS_DIR)) return [];
-  return readdirSync(RESULTS_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => JSON.parse(readFileSync(`${RESULTS_DIR}/${f}`, "utf8")) as PublishedRun)
-    .sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
-}
-
-const NOTES = [
-  {
-    title: "Where the positions come from",
-    body: "Engine self-play, not books or puzzle databases. Every position is novel by construction, so no model can have seen it in training — contamination is designed out rather than defended against. Sets are balanced on category and side to move.",
-  },
-  {
-    title: "Why the error bars matter",
-    body: "Each score carries a 95% confidence interval from a seeded bootstrap. Where two intervals overlap, the data does not separate those models, and the board says so rather than implying a ranking it cannot support.",
-  },
-  {
-    title: "Reproducibility",
-    body: "Every row is traceable to a position-set hash, a frozen prompt hash, and a pinned engine build and depth. Scores from different conditions are never mixed — they are shown as separate boards.",
-  },
-];
-
-function Em({ children }: { children: React.ReactNode }) {
-  return <strong className="font-medium text-arena-text">{children}</strong>;
-}
+/* --------------------------------------------------------------- headline */
 
 /**
- * The sentence a visitor should leave with, written from the run on disk so it
- * can never drift out of step with the numbers underneath it.
- *
- * When the top two intervals overlap it says so here, in the headline, instead
- * of as a warning bolted onto the table: a board that cannot separate its
- * leaders should lead with that rather than bury it under a podium.
+ * Both cards quote a number off disk rather than a written-in one. If a run is
+ * missing the card says so instead of showing a stale figure -- a homepage is
+ * the last place a number should be allowed to drift from its source.
  */
-function Finding({ board }: { board: LeaderboardView }) {
-  const [first, second] = board.rows;
-  if (!first) return null;
 
-  const contested = !!second && overlaps(first.accuracyCI, second.accuracyCI);
-  const blunders = board.rows.map((r) => r.blunderRate);
-  const lo = Math.min(...blunders);
-  const hi = Math.max(...blunders);
+function arenaHeadline() {
+  const board = buildLeaderboards(loadPublishedRuns())[0];
+  if (!board?.rows.length) return null;
+  const top = board.rows[0];
+  return {
+    value: `${top.accuracy.toFixed(1)}%`,
+    caption: `Best move accuracy, ${top.label}, over ${board.positions} frozen positions.`,
+  };
+}
 
+function reasoningHeadline() {
+  const rows = loadResults()?.overall ?? [];
+  const scored = rows.filter((r) => r.claim_accuracy !== null);
+  if (scored.length === 0) return null;
+  const accuracies = scored.map((r) => (r.claim_accuracy as number) * 100);
+  const lo = Math.min(...accuracies);
+  const hi = Math.max(...accuracies);
+  // Every model answers the same bank, so the puzzle count is the largest of
+  // them rather than their sum -- which would report the trace count instead.
+  const puzzles = Math.max(...scored.map((r) => r.tasks));
+  return {
+    value: `${lo.toFixed(0)}–${hi.toFixed(0)}%`,
+    caption: `Share of what a model says about the board that is actually true, across ${scored.length} models and ${puzzles} puzzles.`,
+  };
+}
+
+/* ------------------------------------------------------------------ cards */
+
+type Door = {
+  kicker: string;
+  title: string;
+  body: string;
+  headline: { value: string; caption: string } | null;
+  empty: string;
+  primary: { href: string; label: string };
+  secondary: { href: string; label: string };
+};
+
+function Door({ door }: { door: Door }) {
   return (
-    <p
-      className={`mb-8 max-w-[72ch] border-l-2 pl-4 text-[14.5px] leading-[1.75] text-arena-dim ${
-        contested ? "border-arena-warn/45" : "border-arena-border"
-      }`}
-    >
-      {!second ? (
-        <>
-          <Em>{first.label}</Em> is the only model measured on this set so far,
-          at <Em>{first.accuracy.toFixed(1)}%</Em> over {first.n} positions. One
-          model is not a comparison — it is a baseline waiting for company.
-        </>
-      ) : contested ? (
-        <>
-          <Em>{first.label}</Em> scores highest at{" "}
-          <Em>{first.accuracy.toFixed(1)}%</Em>, but its confidence interval
-          overlaps <Em>{second.label}</Em>&rsquo;s. At {board.positions}{" "}
-          positions, this sample orders the two — it does not separate them.
-          Read the gap between them as noise until the set grows.
-        </>
-      ) : (
-        <>
-          <Em>{first.label}</Em> leads at <Em>{first.accuracy.toFixed(1)}%</Em>,
-          clear of <Em>{second.label}</Em> at {second.accuracy.toFixed(1)}%.
-          Their intervals do not overlap, so {board.positions} positions are
-          enough to separate them.
-        </>
-      )}{" "}
-      {board.rows.length > 1 && (
-        <>
-          Across all {board.rows.length} models, the share of moves that throw
-          away a winning or level position runs from <Em>{lo}%</Em> to{" "}
-          <Em>{hi}%</Em>.
-        </>
-      )}
-    </p>
+    <section className="flex flex-col rounded-xl border border-arena-border bg-arena-panel p-7">
+      <p className="text-[10.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
+        {door.kicker}
+      </p>
+      <h2 className="mt-3 text-[21px] font-semibold leading-[1.25] tracking-[-0.025em]">
+        {door.title}
+      </h2>
+      <p className="mt-3 text-[13.5px] leading-[1.7] text-arena-dim">{door.body}</p>
+
+      <div className="mt-7 border-t border-arena-line pt-6">
+        {door.headline ? (
+          <>
+            <p className="font-mono-arena text-[34px] font-medium leading-none tracking-[-0.03em] text-arena-text tabular-nums">
+              {door.headline.value}
+            </p>
+            <p className="mt-3 max-w-[40ch] text-[12px] leading-[1.6] text-arena-faint">
+              {door.headline.caption}
+            </p>
+          </>
+        ) : (
+          <p className="text-[12.5px] leading-[1.6] text-arena-faint">{door.empty}</p>
+        )}
+      </div>
+
+      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-3 pt-7">
+        <Link
+          href={door.primary.href}
+          className="inline-flex h-10 items-center gap-2 rounded-md bg-arena-text px-5 text-[13.5px] font-medium text-arena-bg transition-colors hover:bg-white"
+        >
+          {door.primary.label}
+          <ArrowRightIcon />
+        </Link>
+        <Link
+          href={door.secondary.href}
+          className="inline-flex h-10 items-center rounded-md border border-arena-border px-4 text-[13px] text-arena-dim transition-colors hover:border-arena-edge hover:text-arena-text"
+        >
+          {door.secondary.label}
+        </Link>
+      </div>
+    </section>
   );
 }
 
+/* ------------------------------------------------------------------- page */
+
+const DIFFERENCES = [
+  {
+    title: "One bit per game is not a measurement",
+    body: "Who won tells you almost nothing — a single game is a coin flip. Both evals here refuse that trade: the arena grades all ~40 moves a model makes, and the reasoning eval pulls roughly six checkable claims out of every puzzle.",
+  },
+  {
+    title: "The referee is stronger than the players",
+    body: "Stockfish is far beyond any language model at chess, so its verdict is ground truth rather than another opinion. That is the property that makes a scoreboard possible at all, and it is the thing most model comparisons lack.",
+  },
+  {
+    title: "Picking well and explaining well come apart",
+    body: "A model can find the right move while describing a pin that is not on the board, or reason soundly and then play something else. Two evals, because those are two abilities and one number cannot hold both.",
+  },
+];
+
 export default function Home() {
-  const boards = buildLeaderboards(loadRuns());
-  // The fullest board is the headline one; the rest are alternative conditions
-  // the reader can switch to inside the table.
-  const headline = boards[0];
+  const traces = loadTraces();
+  const traceCount = traces.reduce((a, t) => a + t.traces.length, 0);
+
+  const doors: Door[] = [
+    {
+      kicker: "Arena",
+      title: "Two models play. Stockfish grades every move.",
+      body: "Watch a full game unfold with both models' analysis streaming beside the board, an eval bar that moves as they blunder, and a scorecard that keeps count. Then read the frozen-position benchmark, where every model answers the same positions alone.",
+      headline: arenaHeadline(),
+      empty: "No published benchmark runs yet — the live match works regardless.",
+      primary: { href: "/arena", label: "Watch a live match" },
+      secondary: { href: "/arena/scorecard", label: "See the scorecard" },
+    },
+    {
+      kicker: "Reasoning eval",
+      title: "Models explain themselves. Every claim gets checked.",
+      body: "Models solve Lichess puzzles and write out their reasoning. Each factual assertion in it is extracted and verified against python-chess and Stockfish, so a confident sentence about a defender that is not there is caught and counted.",
+      headline: reasoningHeadline(),
+      empty: "No scored run on disk yet. Run the pipeline to populate this.",
+      primary: { href: "/reasoning", label: "See the results" },
+      secondary: {
+        href: "/reasoning/traces",
+        label: traceCount > 0 ? `Browse ${traceCount} traces` : "Browse traces",
+      },
+    },
+  ];
 
   return (
-    <main className="mx-auto min-h-screen max-w-[1120px] px-6 py-20 sm:py-24">
-      <header className="max-w-[62ch]">
+    <PageShell>
+      <header className="max-w-[64ch]">
         <h1 className="text-[clamp(34px,4.8vw,50px)] font-semibold leading-[1.06] tracking-[-0.035em]">
-          How well do language models actually play chess?
+          Two ways to measure a model over a chessboard
         </h1>
         <p className="mt-6 text-[16px] leading-[1.7] text-arena-dim">
-          Every model answers the <Em>same positions</Em>, alone — there is no
-          opponent whose choices could skew anyone&rsquo;s score. Stockfish
-          grades each move against its own best, and what comes out is the board
-          below.
+          Most model comparisons are vibes. Chess has a referee that is stronger
+          than every player in the room, which turns an opinion into a
+          scoreboard — once for the moves a model chooses, and again for the
+          things it claims are true about the position in front of it.
         </p>
-        <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-3">
-          <Link
-            href="/arena"
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-arena-text px-5 text-[13.5px] font-medium text-arena-bg transition-colors hover:bg-white"
-          >
-            Watch a match play out
-            <ArrowRightIcon />
-          </Link>
-          <span className="text-[12.5px] text-arena-faint">
-            Two models, one game, graded as they go.
-          </span>
-        </div>
       </header>
 
-      <section className="mt-20">
-        <h2 className="mb-6 border-b border-arena-border pb-3 text-[10.5px] font-medium uppercase tracking-[0.09em] text-arena-faint">
-          Evidence so far
-        </h2>
-
-        {!headline ? (
-          <div className="rounded-xl border border-arena-border bg-arena-panel px-6 py-12 text-center">
-            <p className="text-[14px] text-arena-dim">No published runs yet.</p>
-            <pre className="mt-5 inline-block overflow-x-auto rounded-lg border border-arena-line bg-arena-bg px-4 py-3 text-left font-mono-arena text-[12px] leading-relaxed text-arena-text">
-{`npm run bench -- --set bench/sets/core-v1.json \\
-  --models anthropic/claude-haiku-4.5,google/gemini-3.7-flash \\
-  --publish`}
-            </pre>
-          </div>
-        ) : (
-          <>
-            <Finding board={headline} />
-            <LeaderboardClient boards={boards} />
-          </>
-        )}
-      </section>
+      <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-2">
+        {doors.map((door) => (
+          <Door key={door.kicker} door={door} />
+        ))}
+      </div>
 
       <section className="mt-20 grid gap-8 border-t border-arena-border pt-10 md:grid-cols-3">
-        {NOTES.map((n) => (
-          <div key={n.title}>
+        {DIFFERENCES.map((d) => (
+          <div key={d.title}>
             <h2 className="mb-2 text-[13px] font-medium tracking-[-0.01em] text-arena-text">
-              {n.title}
+              {d.title}
             </h2>
-            <p className="text-[12.5px] leading-[1.65] text-arena-dim">{n.body}</p>
+            <p className="text-[12.5px] leading-[1.65] text-arena-dim">{d.body}</p>
           </div>
         ))}
       </section>
-    </main>
+    </PageShell>
   );
 }

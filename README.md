@@ -1,4 +1,63 @@
-# Chess reasoning eval
+# Chess evals
+
+**Two evals for language models, played out over a chessboard — and one web app
+that shows both.** One grades the moves a model makes. The other checks whether
+what it says about the position is true.
+
+Chess is the rare domain with a referee far stronger than every player in the
+room, which is what turns a comparison into a scoreboard instead of an opinion.
+
+| Section | Route | |
+|---|---|---|
+| **Arena** | `/arena` | Two models play a full game while Stockfish grades every move |
+| | `/arena/scorecard` | Every model answers the same frozen positions, alone |
+| **Reasoning eval** | `/reasoning` | Solve rate against claim accuracy, and what separates the models |
+| | `/reasoning/traces` | All 600 traces, each claim marked true, false or unverifiable |
+| | `/reasoning/<id>` | One puzzle, every model's reasoning, checked against the board |
+
+## Running the web app
+
+```bash
+npm install && npm run dev      # http://localhost:3000
+```
+
+Nothing else is required. The arena ships an offline demo mode that needs no API
+key, and the reasoning pages read a finished run out of `data/`, which is
+committed — no Python, no Stockfish binary, no model calls at render time. The
+two evals share a repo, a design system and a nav bar, and nothing else: one is
+a TypeScript app, the other a Python pipeline whose output it reads.
+
+---
+
+# Eval 1 — the arena
+
+Two models play a full game in the browser while Stockfish grades every move.
+One game yields ~40 independently scored decisions per model — ACPL, blunder
+rate, illegal move rate, tokens spent against quality gained — instead of the
+single bit that says who won.
+
+`/arena` is the live match: both models' analysis streams beside the board, an
+eval bar moves as they blunder, and any move can be clicked to replay it with
+the engine's verdict. `/arena/scorecard` is the headless benchmark underneath
+it, where every model answers the same frozen, content-hashed position set
+alone, so no opponent's choices can skew anyone's score.
+
+```bash
+echo "AI_GATEWAY_API_KEY=your_key" > .env.local   # real matches
+npm run bench -- --set bench/sets/core-v1.json --models a,b --publish
+npm test
+```
+
+> [!WARNING]
+> A real match is a loop of 80+ unattended API calls. **Set a budget cap first.**
+
+The arena is also tagged on its own, as `arena-v1`, from before the reasoning
+eval was built beside it. `AUDIT.md` records which of its design decisions were
+carried across and which of its code was not.
+
+---
+
+# Eval 2 — the chess reasoning eval
 
 **Models solve chess puzzles and write out their reasoning. Every factual claim
 in that reasoning is extracted and checked against python-chess and Stockfish.**

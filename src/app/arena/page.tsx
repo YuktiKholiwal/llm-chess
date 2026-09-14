@@ -150,12 +150,14 @@ export default function Arena() {
       {/* Header. Match settings live in Controls — repeating them here just
           added chrome without adding a place to change them. */}
       <header className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-arena-border pb-3">
+        {/* This page sizes the board against the viewport, so it keeps its own
+            compact bar rather than the site nav. The links mirror it by hand. */}
         <Link
           href="/"
           className="inline-flex h-7 items-center gap-1.5 rounded-md border border-arena-border px-2.5 font-medium text-arena-dim transition-colors hover:border-arena-edge hover:text-arena-text"
         >
           <ArrowLeftIcon />
-          Results
+          Chess evals
         </Link>
 
         <div className="flex items-baseline gap-3">
@@ -220,6 +222,23 @@ export default function Arena() {
               {match.outcome.result} · {match.outcome.reason}
             </span>
           )}
+
+          <span className="hidden items-center gap-1 md:flex">
+            <Link
+              href="/arena/scorecard"
+              title="Same positions, every model, solo"
+              className="rounded-md px-2 py-1 text-arena-faint transition-colors hover:bg-arena-panel hover:text-arena-dim"
+            >
+              Scorecard
+            </Link>
+            <Link
+              href="/reasoning"
+              title="Is what the model says about the board true?"
+              className="rounded-md px-2 py-1 text-arena-faint transition-colors hover:bg-arena-panel hover:text-arena-dim"
+            >
+              Reasoning eval
+            </Link>
+          </span>
         </div>
       </header>
 
