@@ -1,328 +1,174 @@
-# Chess evals
+<div align="center">
 
-**Two evals for language models, played out over a chessboard — and one web app
-that shows both.** One grades the moves a model makes. The other checks whether
-what it says about the position is true.
+# ♟️ Chess evals
 
-Chess is the rare domain with a referee far stronger than every player in the
-room, which is what turns a comparison into a scoreboard instead of an opinion.
+### Two ways to measure a language model, played out over a chessboard.
 
-| Section | Route | |
-|---|---|---|
-| **Arena** | `/arena` | Two models play a full game while Stockfish grades every move |
-| | `/arena/scorecard` | Every model answers the same frozen positions, alone |
-| **Reasoning eval** | `/reasoning` | Solve rate against claim accuracy, and what separates the models |
-| | `/reasoning/traces` | All 600 traces, each claim marked true, false or unverifiable |
-| | `/reasoning/<id>` | One puzzle, every model's reasoning, checked against the board |
+**One grades the moves a model makes. The other checks whether what it says
+about the position is true.**
 
-## Running the web app
+<img src="docs/arena.jpg" alt="Two models mid-game with live analysis and Stockfish scorecards" width="100%">
+
+</div>
+
+---
+
+## The idea in one paragraph
+
+Most model comparisons are vibes. Chess is unusual in having a referee —
+Stockfish — that is far stronger than any language model, so its verdict is
+ground truth rather than another opinion. That turns a comparison into a
+scoreboard. This repo points that referee at models twice: once at the moves
+they play, and once at the sentences they write about the board.
+
+---
+
+## Try it in 30 seconds
 
 ```bash
 npm install && npm run dev      # http://localhost:3000
 ```
 
-Nothing else is required. The arena ships an offline demo mode that needs no API
-key, and the reasoning pages read a finished run out of `data/`, which is
-committed — no Python, no Stockfish binary, no model calls at render time. The
-two evals share a repo, a design system and a nav bar, and nothing else: one is
-a TypeScript app, the other a Python pipeline whose output it reads.
+No API key, no Python, no Stockfish install. The arena has an offline demo mode,
+and the reasoning pages read a finished run that is committed to the repo.
 
 ---
 
-# Eval 1 — the arena
+## What you can look at
 
-Two models play a full game in the browser while Stockfish grades every move.
-One game yields ~40 independently scored decisions per model — ACPL, blunder
-rate, illegal move rate, tokens spent against quality gained — instead of the
-single bit that says who won.
+| Route | What it shows |
+|---|---|
+| `/` | Both headline numbers, and a door into each eval |
+| `/arena` | **Two models play a full game**, analysis streaming beside the board, Stockfish grading every move as it lands |
+| `/arena/scorecard` | The same frozen positions answered by every model, alone — accuracy, ACPL, blunder rate, with error bars |
+| `/reasoning` | Solve rate against **claim accuracy**, and which metrics actually separate the models |
+| `/reasoning/traces` | All 600 reasoning traces, filterable |
+| `/reasoning/<id>` | One puzzle: the board, what each model wrote, and every claim marked ✓ ✗ ? |
 
-`/arena` is the live match: both models' analysis streams beside the board, an
-eval bar moves as they blunder, and any move can be clicked to replay it with
-the engine's verdict. `/arena/scorecard` is the headless benchmark underneath
-it, where every model answers the same frozen, content-hashed position set
-alone, so no opponent's choices can skew anyone's score.
+**If you only open one page, make it a trace.** `/reasoning/DxWfR` shows a model
+playing the correct move while asserting a check that is not on the board. That
+is what the second eval exists to catch, and no percentage can show it to you.
+
+---
+
+## The two evals, briefly
+
+### Eval 1 — the arena
+
+Two models play each other while Stockfish grades every move. A game normally
+tells you one thing — who won — which is almost meaningless, since a single game
+is a coin flip. Grading every move instead yields ~40 scored decisions per model
+per game: accuracy, average centipawn loss, blunder rate, illegal-move rate, and
+tokens spent against quality gained.
+
+`/arena/scorecard` is the stricter version underneath it: every model answers an
+identical, content-hashed set of positions **alone**, so no opponent's choices
+can skew anyone's score. Positions come from engine self-play, so none of them
+can be in training data.
+
+### Eval 2 — the reasoning eval
+
+Models solve Lichess puzzles and write out their reasoning. Every factual claim
+in that reasoning is extracted and checked against python-chess and Stockfish.
+
+The headline is the **gap** between how often a model picks the right move and
+how often the things it says are true. A model can solve a puzzle while
+describing a pin that does not exist — solve rate cannot see that, because it
+reports one bit per puzzle. Checking the reasoning turns one puzzle into roughly
+six verifiable assertions.
+
+**The finding so far:** line-claim accuracy — whether a calculated variation
+actually plays out — is the only measure that cleanly separates the three models
+tested (28.1% to 55.9%, non-overlapping intervals). Solve rate does not. Neither
+does claim accuracy overall. Full numbers in **[RESULTS.md](RESULTS.md)**.
+
+---
+
+## What is actually in this repo
+
+Two independent projects sharing a directory, a design system and a nav bar.
+They share no runtime, no package manager and no engine binding.
+
+| | What it is | Size | Stack |
+|---|---|---|---|
+| `src/app`, `src/components`, `src/hooks` | The web app — all six routes above | ~4,600 lines | Next.js 16, React 19, Tailwind 4 |
+| `src/lib` | Arena match loop, prompts, parsing, Stockfish WASM binding | ~1,300 lines | TypeScript |
+| `src/bench` | The frozen-position benchmark behind `/arena/scorecard` | ~900 lines | TypeScript |
+| `src/reasoning` | Reads the Python pipeline's output and joins it for the web app | ~550 lines | TypeScript |
+| `eval/` | **The reasoning eval pipeline** — five stages, tasks → run → extract → verify → score | ~3,600 lines | Python 3.12, python-chess |
+| `data/` | A finished run: 200 puzzles, 3 models, 600 traces, ~3,900 claims with verdicts | ~7 MB | JSONL |
+| `bench/` | The frozen position set and published arena results | 52 KB | JSON |
+| tests | 155 TypeScript + 179 Python, all passing | ~2,500 lines | vitest, pytest |
+
+### Documentation
+
+| File | |
+|---|---|
+| **[RESULTS.md](RESULTS.md)** | The reasoning eval's numbers, with error bars and limitations |
+| [RESULTS_slices.md](RESULTS_slices.md) | Accuracy cut by claim kind, rating band and plan soundness |
+| [docs/reasoning-pipeline.md](docs/reasoning-pipeline.md) | How each pipeline stage works, and why |
+| [AUDIT.md](AUDIT.md) | What this repo was before, and what survived the change |
+
+---
+
+## Running things that cost money
+
+Everything above is free. These are not.
 
 ```bash
-echo "AI_GATEWAY_API_KEY=your_key" > .env.local   # real matches
-npm run bench -- --set bench/sets/core-v1.json --models a,b --publish
-npm test
+echo "AI_GATEWAY_API_KEY=your_key" > .env.local
 ```
+
+One key from the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) covers
+Anthropic, OpenAI, Google and open-weight models at provider list price.
+
+| | Command | Cost |
+|---|---|---|
+| A live arena match | pick real models in the UI, press Start | ~2¢ to $5, by tier |
+| The arena benchmark | `npm run bench -- --set bench/sets/core-v1.json --models a,b --publish` | cents per model |
+| A full reasoning run | `uv run python -m eval run --config config/models.yaml --stage all` | **$24 for the run on disk** |
 
 > [!WARNING]
-> A real match is a loop of 80+ unattended API calls. **Set a budget cap first.**
+> Both are unattended loops making dozens to hundreds of API calls. **Set a
+> budget cap before starting one.** The reasoning pipeline enforces
+> `limits.max_cost_usd` from `config/models.yaml`; the arena shows a live cost
+> meter but does not stop itself.
 
-The arena is also tagged on its own, as `arena-v1`, from before the reasoning
-eval was built beside it. `AUDIT.md` records which of its design decisions were
-carried across and which of its code was not.
-
----
-
-# Eval 2 — the chess reasoning eval
-
-**Models solve chess puzzles and write out their reasoning. Every factual claim
-in that reasoning is extracted and checked against python-chess and Stockfish.**
-
-The headline number is the **gap** between how often a model picks the right
-move and how often the things it says about the position are true.
-
-That gap is the point. A model can solve a puzzle while describing a pin that
-does not exist, a defender that is not there, or a passed pawn an enemy pawn
-still holds up. Solve rate alone cannot see any of that — it reports one bit
-per puzzle and treats a lucky guess and a sound calculation as the same event.
-Checking the reasoning turns a single puzzle into a dozen independently
-verifiable assertions.
-
----
-
-## Pipeline
-
-Five stages, each with a JSON contract, each runnable alone from the previous
-stage's output on disk.
-
-```
-tasks  →  runner  →  extractor  →  verifier  →  scorer
-  │          │           │             │           │
-  │          │           │             │           └─ results.json, RESULTS.md
-  │          │           │             └─ verified.jsonl   python-chess + Stockfish
-  │          │           └─ claims.jsonl                   reasoning → atomic claims
-  │          └─ runs.jsonl                                 model calls, cached per (task, model)
-  └─ tasks.jsonl                                           Lichess puzzles, stratified by rating
-```
-
-Caching is what makes this usable. The expensive stage is `run`; every later
-stage reads its file. You can rewrite the extractor and rescore all day without
-sending another request to a model under test.
-
----
-
-## Setup
-
-**Stockfish** must be a native binary. The WebAssembly builds on npm will not
-work — `python-chess` speaks UCI to an executable over stdio.
+The reasoning pipeline also needs Python and a **native** Stockfish binary
+(`brew install stockfish` — the WASM build on npm will not work, since
+python-chess speaks UCI over stdio). Neither is needed to browse results.
 
 ```bash
-brew install stockfish          # macOS
-sudo apt install stockfish      # Debian/Ubuntu
-stockfish quit                  # should print a version banner
-```
-
-Point `engine.path` in `config/models.yaml` at an absolute path if it is not on
-your `PATH`.
-
-**Python 3.12 and dependencies**, via [uv](https://docs.astral.sh/uv/):
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv sync
-```
-
-**A provider key.** The default is the
-[Vercel AI Gateway](https://vercel.com/docs/ai-gateway), which covers every
-model in the config including the extractor:
-
-```bash
-cp .env.example .env
-# paste a key from https://vercel.com/[team]/~/ai/api-keys
-```
-
-Any OpenAI-compatible endpoint works — the Gateway and OpenRouter take an
-identical request body, and both report per-response cost, which is what lets
-the runner price a run without a local rate table. Switch by editing
-`provider.base_url` and `provider.api_key_env` in `config/models.yaml`.
-
----
-
-## Running it
-
-```bash
-uv run python -m eval run --config config/models.yaml --stage all
-```
-
-`--stage` also takes `tasks`, `run`, `extract`, `verify` or `score` to run one
-stage alone. Useful flags:
-
-| Flag | |
-|---|---|
-| `--limit N` | cap the task count, sampled evenly across rating bands |
-| `--models a,b` | restrict to some of the models in the config |
-| `--max-cost N` | USD ceiling for this invocation |
-| `--dry-run` | report what would be requested, send nothing |
-| `--force` | ignore cached rows and redo the work |
-
-A first run downloads the ~300MB Lichess puzzle export. It stays compressed;
-the build streams through it once.
-
-```bash
-uv run pytest                                    # the test suite
-uv run python scripts/eval_extractor.py --seed 50   # traces to hand-label
-uv run python scripts/eval_extractor.py             # extractor recall/precision
+npm test        # 155 TypeScript tests
+uv run pytest   # 179 Python tests
 ```
 
 ---
 
-## What each stage does
+## Things this does not claim
 
-### tasks
+Worth knowing before trusting any number here.
 
-Builds a 200-puzzle bank from the Lichess export: four rating bands (1200,
-1600, 2000, 2400) of 50 each, sampled with a seeded reservoir so the draw is
-uniform over all 6.1M rows rather than a slice of Lichess's export ordering.
-Bands are separated by a tolerance rather than made adjacent — a 1400 puzzle is
-evidence about neither the 1200 nor the 1600 cohort.
+- **The reasoning eval's puzzles may be in training data.** The Lichess export
+  carries no puzzle creation date, so the intended recency filter had nothing to
+  filter on. Nothing separates recall from reasoning.
+- **Claim extraction is done by a model, not an oracle.** A claim the extractor
+  misses is one the model under test is never held to, and that error rate is
+  currently unmeasured.
+- **The last verification run stopped at 570 of 600.** One model is short 30
+  runs; the pages mark it rather than hiding it.
+- **The arena's benchmark is small.** 30 positions is enough to order models and
+  not enough to separate them, and the page says so instead of implying a
+  ranking it cannot support.
 
-Two details in the source file drive the code:
-
-**The FEN column is not the position a solver sees.** Lichess documents it as
-the position *before* the opponent's move; the puzzle starts after applying the
-first move, and the solution begins at the second. Skip that offset and every
-task asks the wrong side to move with a solution shifted by one — which raises
-nothing, and merely looks like models that cannot solve puzzles.
-
-**There is no puzzle creation date.** The columns are `PuzzleId, FEN, Moves,
-Rating, RatingDeviation, Popularity, NbPlays, Themes, GameUrl, OpeningTags,
-DailyDate`, and `DailyDate` marks the day a puzzle was *featured*, absent for
-almost all of them. A recency filter has nothing to filter on, so contamination
-is **not** controlled here and RESULTS.md says so.
-
-### runner
-
-Asks each model for a move through the configured endpoint, with a frozen,
-content-hashed prompt: FEN, ASCII board, side to move, and a required
-`<reasoning>/<plan>/<move>` reply. Provider-side thinking is captured where the
-API exposes it and left null otherwise.
-
-One retry on an illegal move, with the legal move list supplied. It is withheld
-the first time because reading legality off the position is part of what is
-being measured; withholding it twice would only measure the same failure again.
-
-Cost comes from the provider's own usage report, so there is no local rate
-table to drift. Rate limits back off; auth and billing failures fail at once;
-three consecutive request failures stop the run, because an unreachable API is
-not a model scoring zero.
-
-### extractor
-
-Rewrites each reasoning trace as a list of atomic claims, typed `state`,
-`line`, `best_move` or `unverifiable`, each carrying a structured form the
-verifier can act on.
-
-Its central instruction is that it **transcribes and never judges**. An
-extractor that quietly corrects a wrong claim stops measuring the model under
-test and starts measuring its own chess. Truth is decided later.
-
-Claims may be negated — reasoning is full of "the knight is *not* defended", and
-without a way to say so every negative assertion would land in the unverifiable
-bucket. That loss would not be neutral: negative claims are where careless
-reasoning most often goes wrong.
-
-`unverifiable` is a judgement, not a default. A claim earns it only by
-containing no move sequence and no checkable fact about the board. Under v1 of
-the prompt it was where anything awkward ended up, and three quarters of every
-trace went unchecked as a result.
-
-### verifier
-
-**State handlers**, over python-chess: `pinned`, `attacked`, `defended`,
-`hanging`, `material`, `check`, `mate_in`, `controls_square`,
-`piece_on_square`, `castling_rights`, `passed_pawn`. Each returns true, false,
-or **unverifiable** — a distinct third value, because scoring an unanswerable
-claim as false would blame a model for the extractor's silence. `mate_in` is
-the one a rules library cannot answer and defers to Stockfish.
-
-**The line handler** checks a calculated variation: play the moves, then test an
-assertion about where they end up. An illegal move makes the claim false and
-the reason names which move broke — that is the most common way a model's
-calculation is wrong. Move numbers and ellipses are stripped as the notation
-they are, and alternatives (`Kf3/Ke3`) are expanded so that every branch must
-hold, since a model offering both is claiming both. Assertions cover check,
-mate, captures, material balance, forced replies, king mobility, and engine
-evaluation bounds.
-
-Lines matter more than their share of the code suggests. Triage of the first
-run found that half of everything the verifier could not check was a
-conditional variation — the most substantive thing a model says about a
-position, and all of it previously unscored.
-
-**The best_move handler** asks whether a named move is within 30cp of the
-engine's best, rather than whether it is the single top choice. Several moves
-are often equal, and a model preferring one of two equivalent winning moves has
-not made a mistake.
-
-Plans are scored once per task from the model's stated `<plan>`, by the
-centipawn loss of the move it implies at depth 20. That move is read from the
-text where the plan names it, and only otherwise resolved by a model call. A
-plan that resolves to nothing is left unscored rather than assumed to be the
-played move.
-
-This is the module the eval rests on, so it is the one with real tests: every
-handler against hand-built positions chosen to separate it from the mistake it
-is most likely to make — a real pin from a blocked one, a hanging piece from a
-defended one, a passed pawn from one an enemy pawn still holds up.
-
-### scorer
-
-Per model, per model × band, per model × motif:
-
-| | |
-|---|---|
-| `solve_rate` | move equals the first move of the solution |
-| `claim_accuracy` | true / (true + false), overall and split state vs line |
-| `unverifiable_rate` | share of claims nothing could check |
-| `plan_cp_loss_median` | how much the engine dislikes the plan's move |
-| `consistency` | the stated plan's move is the move played |
-| `reasoning_outcome_gap` | `solve_rate − claim_accuracy` |
-| `cost_per_task` | |
-
-Confidence intervals resample **whole tasks**, not individual claims. Claims
-from one trace are correlated, and resampling them independently would report
-an interval far narrower than the evidence supports.
-
-`claim_accuracy` excludes unverifiable claims from its denominator, as
-specified — which means it **rewards vagueness**: a model that hedges
-everything into unverifiable prose can score well on a denominator of three. It
-is therefore always published beside its raw counts and claims-per-task, so a
-thin denominator is visible rather than something a reader has to infer.
+Every published number carries a 95% bootstrap confidence interval, and prompts
+are content-hashed so that changing the instrument fails the build rather than
+quietly invalidating old scores.
 
 ---
-
-## Layout
-
-```
-config/models.yaml       models, engine, limits, task sampling
-eval/
-├── __main__.py          the one entry point
-├── config.py            typed config, .env loading
-├── store.py             JSONL read/append, cache keys
-├── manifest.py          content hashing, per-stage run manifests
-├── tasks/               download + build the puzzle bank
-├── runner/              prompt, OpenRouter client, parser, run loop
-├── extractor/           claim schema, extraction prompt, extract loop
-├── verifier/            state handlers, line checking, engine, plan resolution
-└── scorer/              aggregation, bootstrap intervals, report
-scripts/eval_extractor.py   recall/precision against a labelled set
-scripts/slices.py           accuracy by claim kind, band and plan soundness
-tests/                   handlers, lines, tasks, parsing, frozen prompts, scoring
-data/                    the bank, the stage outputs, the manifests
-AUDIT.md                 what this repo was before, and what was reused
-```
-
-Every stage writes a manifest to `data/manifests/` naming its inputs by hash,
-so any number in RESULTS.md traces back to the bank, the prompt text and the
-engine build that produced it.
-
-## Prompts are frozen
-
-The runner and extractor prompts are content-hashed and their hashes are
-asserted by tests. Rewording one makes every previously published number
-incomparable, so changing the instrument fails the build rather than showing up
-later as an unexplained shift in the results. To change a prompt, add the next
-version beside the current one rather than editing it — the extractor is on v2
-for exactly that reason, and v1's claims are kept on disk as a baseline so the
-change could be measured rather than asserted.
 
 ## Stack
 
-Python 3.12 · [uv](https://docs.astral.sh/uv/) ·
-[python-chess](https://python-chess.readthedocs.io) ·
-[Stockfish](https://stockfishchess.org) · httpx ·
-[Vercel AI Gateway](https://vercel.com/docs/ai-gateway) · JSONL
+TypeScript · Next.js 16 · React 19 · Tailwind 4 · Stockfish 18 WASM ·
+chess.js · AI SDK 7 — and — Python 3.12 · [uv](https://docs.astral.sh/uv/) ·
+[python-chess](https://python-chess.readthedocs.io) · native Stockfish · httpx
